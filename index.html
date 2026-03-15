@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Miniature Game Tracker</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="apple-touch-icon" href="./icon.png">
+
     <style>
         /* UI 및 폰트 통일 */
         :root {
@@ -416,7 +421,7 @@
 
     function saveFaction() {
         const factionName = document.getElementById('factionName').value.trim();
-        const factionRule = document.getElementById('factionRule').value.trim(); // 팩션 룰 데이터 읽기
+        const factionRule = document.getElementById('factionRule').value.trim(); 
         
         if (!factionName) {
             alert('이름을 입력해주세요.');
@@ -427,13 +432,13 @@
             const newEntry = {
                 id: Date.now(),
                 name: factionName,
-                rule: factionRule, // 팩션 룰 저장
+                rule: factionRule, 
                 phases: currentData
             };
             savedFactions.push(newEntry);
         } else {
             savedFactions[editingIndex].name = factionName;
-            savedFactions[editingIndex].rule = factionRule; // 팩션 룰 수정 반영
+            savedFactions[editingIndex].rule = factionRule; 
             savedFactions[editingIndex].phases = currentData;
         }
 
@@ -469,7 +474,6 @@
                 <div class="faction-content ${isActive}" id="faction-content-${factionIndex}">
             `;
 
-            // 킬팀 전용 팩션 룰 표시 (입력된 내용이 있을 때만 렌더링)
             if (currentGameKey === 'killteam' && faction.rule) {
                 html += `
                     <div class="faction-rule-box">
@@ -544,6 +548,17 @@
             openFactions.clear(); 
             renderFactionList();
         }
+    }
+
+    // PWA 서비스 워커 등록 스크립트
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                console.log('Service worker registered!', reg);
+            }).catch(err => {
+                console.log('Service worker registration failed:', err);
+            });
+        });
     }
 </script>
 
