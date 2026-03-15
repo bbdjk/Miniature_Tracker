@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Miniature Game Tracker</title>
+    <style>
+        /* UI 및 폰트 통일 */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --text-color: #2f3640;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 화면 전환용 클래스 */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        /* 공통 헤더 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dcdde1;
+        }
+        
+        h1, h2, h3 { margin: 0; color: var(--primary-color); }
+
+        /* 버튼 스타일 */
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn:active { background-color: #2980b9; }
+        .btn-small { padding: 5px 10px; font-size: 14px; }
+        .btn-outline { background-color: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); }
+        .btn-warning { background-color: var(--warning-color); color: white; border: none; }
+        .btn-warning:active { background-color: #d68910; }
+
+        /* 리스트 및 카드 스타일 */
+        .card {
+            background-color: var(--card-bg);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .card.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #e8ecef;
+        }
+        .clickable-card { cursor: pointer; transition: transform 0.1s; }
+        .clickable-card:active { transform: scale(0.98); }
+
+        /* 저장된 팩션 리스트 아코디언 스타일 */
+        .faction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+        .faction-content {
+            display: none; 
+            margin-top: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .faction-content.active { display: block; }
+
+        /* 입력 폼 스타일 */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #dcdde1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        /* 페이즈 아코디언 스타일 */
+        .phase-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .phase-content {
+            display: none;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #dcdde1;
+            border-radius: 0 0 6px 6px;
+            margin-top: -5px;
+            margin-bottom: 15px;
+        }
+        .phase-content.active { display: block; }
+
+        /* 유닛 및 능력 리스트 아이템 */
+        .unit-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 10px;
+            border-bottom: 1px solid #f1f2f6;
+        }
+        .unit-item:last-child { border-bottom: none; }
+        .unit-checkbox {
+            margin-right: 15px;
+            margin-top: 5px;
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+        .unit-details { flex-grow: 1; }
+        .unit-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; display: block; cursor: pointer; }
+        .unit-ability { font-size: 14px; color: #7f8fa6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="screen-home" class="screen active">
+        <div class="header">
+            <h1>Game Tracker</h1>
+        </div>
+        
+        <div class="card clickable-card" onclick="navToGame('spearhead')">
+            <h2>Spearhead</h2>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">팩션 리스트 보기</p>
+        </div>
+        
+        <div class="card clickable-card" onclick="navToGame('killteam')">
+            <h2>Kill Team</h2>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 능력 리스트 보기</p>
+        </div>
+
+        <div class="card disabled">Warhammer 40,000 (준비 중)</div>
+        <div class="card disabled">Age of Sigmar (준비 중)</div>
+        <div class="card disabled">Obsidian Protocol (준비 중)</div>
+    </div>
+
+    <div id="screen-list" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-home')">◀ 메인</button>
+            <h2 id="list-game-title">Game Title</h2>
+            <button class="btn" onclick="navTo('screen-edit')">＋ 추가</button>
+        </div>
+        <div id="faction-list-container">
+            </div>
+    </div>
+
+    <div id="screen-edit" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-list')">취소</button>
+            <h2 id="edit-title">새 리스트 추가</h2>
+            <button class="btn" onclick="saveFaction()">저장</button>
+        </div>
+        
+        <label for="factionName" style="font-weight:bold;">팩션(팀) 이름</label>
+        <input type="text" id="factionName" placeholder="이름을 입력하세요">
+
+        <div style="margin-top: 20px;">
+            <h3 id="phase-settings-title">페이즈별 유닛 및 능력 설정</h3>
+            <p style="font-size:12px; color:#7f8fa6; margin-top:5px;">각 항목을 눌러 유닛과 능력을 추가하세요.</p>
+        </div>
+
+        <div id="phases-container">
+            </div>
+    </div>
+</div>
+
+<script>
+    // 각 게임별 설정 데이터 모음
+    const gameConfig = {
+        spearhead: {
+            title: "Spearhead",
+            phases: ["히어로페이즈", "무브페이즈", "사격페이즈", "차지페이즈", "어택페이즈", "엔드페이즈"],
+            settingTitle: "페이즈별 유닛 및 능력 설정"
+        },
+        killteam: {
+            title: "Kill Team",
+            phases: ["Scouting Phase", "Initiative Phase", "Strategy Phase", "Firefight Phase"],
+            settingTitle: "터닝페이즈 별 유닛 능력 설정"
+        }
+    };
+
+    let currentData = {};
+    let savedFactions = [];
+    let editingIndex = -1; 
+    let openFactions = new Set(); 
+    
+    let currentGameKey = ''; 
+    let currentPhases = []; // 현재 선택된 게임의 페이즈 배열
+
+    // 메인화면에서 게임을 선택할 때 실행
+    function navToGame(gameKey) {
+        currentGameKey = gameKey;
+        const config = gameConfig[gameKey];
+        
+        // 해당 게임의 페이즈 배열 적용
+        currentPhases = config.phases;
+        
+        savedFactions = JSON.parse(localStorage.getItem(currentGameKey + '_factions')) || [];
+        openFactions.clear(); 
+        
+        // UI 텍스트 업데이트
+        document.getElementById('list-game-title').innerText = config.title;
+        document.getElementById('phase-settings-title').innerText = config.settingTitle;
+        
+        navTo('screen-list');
+    }
+
+    function navTo(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+
+        if (screenId === 'screen-edit') {
+            editingIndex = -1; 
+            document.getElementById('edit-title').innerText = "새 리스트 추가";
+            initEditScreen();
+        } else if (screenId === 'screen-list') {
+            renderFactionList();
+        }
+    }
+
+    function editFaction(index) {
+        editingIndex = index;
+        const faction = savedFactions[index];
+        
+        currentData = JSON.parse(JSON.stringify(faction.phases));
+        
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById('screen-edit').classList.add('active');
+        
+        document.getElementById('edit-title').innerText = "리스트 수정";
+        document.getElementById('factionName').value = faction.name;
+        
+        renderPhases();
+    }
+
+    function initEditScreen() {
+        document.getElementById('factionName').value = '';
+        currentData = {};
+        currentPhases.forEach(p => currentData[p] = []); 
+        renderPhases();
+    }
+
+    function renderPhases() {
+        const container = document.getElementById('phases-container');
+        container.innerHTML = '';
+
+        currentPhases.forEach(phase => {
+            const phaseWrapper = document.createElement('div');
+            
+            const header = document.createElement('div');
+            header.className = 'phase-header';
+            header.innerHTML = `<span>${phase}</span> <span>▼</span>`;
+            header.onclick = () => togglePhase(content);
+
+            const content = document.createElement('div');
+            content.className = 'phase-content';
+            content.id = `content-${phase}`;
+
+            const unitList = document.createElement('div');
+            unitList.id = `list-${phase}`;
+            
+            const inputArea = document.createElement('div');
+            inputArea.style.marginTop = '10px';
+            inputArea.style.paddingTop = '10px';
+            inputArea.style.borderTop = '1px dashed #ccc';
+            
+            inputArea.innerHTML = `
+                <input type="text" id="unitName-${phase}" placeholder="유닛 이름">
+                <input type="text" id="unitAbility-${phase}" placeholder="사용할 능력">
+                <button class="btn btn-small" onclick="addUnit('${phase}')" style="width:100%">+ 이 페이즈에 추가</button>
+            `;
+
+            content.appendChild(unitList);
+            content.appendChild(inputArea);
+            
+            phaseWrapper.appendChild(header);
+            phaseWrapper.appendChild(content);
+            container.appendChild(phaseWrapper);
+
+            renderUnitsInEdit(phase);
+        });
+    }
+
+    function togglePhase(element) {
+        element.classList.toggle('active');
+    }
+
+    function toggleFactionContent(index) {
+        const content = document.getElementById(`faction-content-${index}`);
+        const icon = document.getElementById(`faction-icon-${index}`);
+        
+        content.classList.toggle('active');
+        
+        if (content.classList.contains('active')) {
+            icon.innerText = '▲';
+            openFactions.add(index);
+        } else {
+            icon.innerText = '▼';
+            openFactions.delete(index);
+        }
+    }
+
+    function addUnit(phase) {
+        const nameInput = document.getElementById(`unitName-${phase}`);
+        const abilityInput = document.getElementById(`unitAbility-${phase}`);
+        
+        if (!nameInput.value.trim() || !abilityInput.value.trim()) {
+            alert('유닛 이름과 능력을 모두 입력해주세요.');
+            return;
+        }
+
+        // 특정 페이즈 데이터가 없는 경우를 대비
+        if (!currentData[phase]) currentData[phase] = [];
+
+        currentData[phase].push({
+            name: nameInput.value,
+            ability: abilityInput.value,
+            checked: false
+        });
+
+        nameInput.value = '';
+        abilityInput.value = '';
+        
+        renderUnitsInEdit(phase);
+    }
+
+    function renderUnitsInEdit(phase) {
+        const listContainer = document.getElementById(`list-${phase}`);
+        listContainer.innerHTML = '';
+        
+        if(currentData[phase]) {
+            currentData[phase].forEach((item, index) => {
+                listContainer.innerHTML += `
+                    <div class="unit-item">
+                        <div class="unit-details">
+                            <div class="unit-name">${item.name}</div>
+                            <div class="unit-ability">${item.ability}</div>
+                        </div>
+                        <button class="btn-small btn-outline" style="border:none; color:red;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function removeUnit(phase, index) {
+        currentData[phase].splice(index, 1);
+        renderUnitsInEdit(phase);
+    }
+
+    function saveFaction() {
+        const factionName = document.getElementById('factionName').value.trim();
+        if (!factionName) {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+
+        if (editingIndex === -1) {
+            const newEntry = {
+                id: Date.now(),
+                name: factionName,
+                phases: currentData
+            };
+            savedFactions.push(newEntry);
+        } else {
+            savedFactions[editingIndex].name = factionName;
+            savedFactions[editingIndex].phases = currentData;
+        }
+
+        localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+        navTo('screen-list');
+    }
+
+    function renderFactionList() {
+        const container = document.getElementById('faction-list-container');
+        container.innerHTML = '';
+
+        if (savedFactions.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#7f8fa6; margin-top:50px;">저장된 리스트가 없습니다.<br>우측 상단의 + 버튼을 눌러 추가해주세요.</p>';
+            return;
+        }
+
+        savedFactions.forEach((faction, factionIndex) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const isActive = openFactions.has(factionIndex) ? 'active' : '';
+            const iconStr = openFactions.has(factionIndex) ? '▲' : '▼';
+
+            let html = `
+                <div class="faction-header" onclick="toggleFactionContent(${factionIndex})">
+                    <h3 style="margin:0;">${faction.name} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
+                    <div>
+                        <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); editFaction(${factionIndex})">수정</button>
+                        <button class="btn-small btn-outline" style="border:none; color:var(--danger-color); padding:5px;" onclick="event.stopPropagation(); deleteFaction(${factionIndex})">삭제</button>
+                    </div>
+                </div>
+                
+                <div class="faction-content ${isActive}" id="faction-content-${factionIndex}">
+                    <div style="text-align: right; margin-bottom: 15px;">
+                        <button class="btn-small btn-warning" onclick="event.stopPropagation(); resetChecks(${factionIndex})">
+                            ⟳ 라운드 리셋 (체크 해제)
+                        </button>
+                    </div>
+            `;
+
+            let hasUnits = false;
+            // 선택된 게임의 페이즈 순서에 맞춰 렌더링
+            currentPhases.forEach(phase => {
+                const units = faction.phases[phase] || [];
+                if (units.length > 0) {
+                    hasUnits = true;
+                    html += `<div style="margin-top:10px; font-weight:bold; color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px;">[${phase}]</div>`;
+                    units.forEach((u, unitIndex) => {
+                        const checkboxId = `chk-${factionIndex}-${phase}-${unitIndex}`;
+                        const isChecked = u.checked ? 'checked' : '';
+                        
+                        html += `
+                            <div class="unit-item" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
+                                <div class="unit-details">
+                                    <label for="${checkboxId}" class="unit-name">${u.name}</label>
+                                    <div class="unit-ability">${u.ability}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            if(!hasUnits) {
+                html += `<p style="text-align:center; color:#7f8fa6; font-size:14px;">저장된 유닛/능력이 없습니다.</p>`;
+            }
+
+            html += `</div>`; 
+            card.innerHTML = html;
+            container.appendChild(card);
+        });
+    }
+
+    function toggleCheck(factionIndex, phase, unitIndex, isChecked) {
+        savedFactions[factionIndex].phases[phase][unitIndex].checked = isChecked;
+        localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+    }
+
+    function resetChecks(factionIndex) {
+        if(confirm('이 리스트의 모든 체크를 초기화하여 다음 라운드를 준비하시겠습니까?')) {
+            currentPhases.forEach(phase => {
+                if(savedFactions[factionIndex].phases[phase]) {
+                    savedFactions[factionIndex].phases[phase].forEach(u => u.checked = false);
+                }
+            });
+            localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+            renderFactionList();
+        }
+    }
+
+    function deleteFaction(index) {
+        if(confirm('이 리스트를 삭제하시겠습니까?')) {
+            savedFactions.splice(index, 1);
+            localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+            openFactions.clear(); 
+            renderFactionList();
+        }
+    }
+</script>
+
+</body>
+</html>
