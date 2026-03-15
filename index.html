@@ -97,6 +97,15 @@
         }
         .faction-content.active { display: block; }
 
+        /* 팩션 룰 표시 박스 스타일 */
+        .faction-rule-box {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-color);
+        }
+
         /* 입력 폼 스타일 */
         input[type="text"] {
             width: 100%;
@@ -194,6 +203,11 @@
         <label for="factionName" style="font-weight:bold;">팩션(팀) 이름</label>
         <input type="text" id="factionName" placeholder="이름을 입력하세요">
 
+        <div id="killteam-rule-section" style="display:none;">
+            <label for="factionRule" style="font-weight:bold; display:block; margin-top:5px;">팩션 룰</label>
+            <input type="text" id="factionRule" placeholder="간단한 팩션 룰을 적어주세요">
+        </div>
+
         <div style="margin-top: 20px;">
             <h3 id="phase-settings-title">페이즈별 유닛 및 능력 설정</h3>
             <p style="font-size:12px; color:#7f8fa6; margin-top:5px;">각 항목을 눌러 유닛과 능력을 추가하세요.</p>
@@ -205,7 +219,7 @@
 </div>
 
 <script>
-    // 각 게임별 설정 데이터 모음
+    // 게임 설정
     const gameConfig = {
         spearhead: {
             title: "Spearhead",
@@ -225,20 +239,16 @@
     let openFactions = new Set(); 
     
     let currentGameKey = ''; 
-    let currentPhases = []; // 현재 선택된 게임의 페이즈 배열
+    let currentPhases = []; 
 
-    // 메인화면에서 게임을 선택할 때 실행
     function navToGame(gameKey) {
         currentGameKey = gameKey;
         const config = gameConfig[gameKey];
         
-        // 해당 게임의 페이즈 배열 적용
         currentPhases = config.phases;
-        
         savedFactions = JSON.parse(localStorage.getItem(currentGameKey + '_factions')) || [];
         openFactions.clear(); 
         
-        // UI 텍스트 업데이트
         document.getElementById('list-game-title').innerText = config.title;
         document.getElementById('phase-settings-title').innerText = config.settingTitle;
         
@@ -269,12 +279,29 @@
         
         document.getElementById('edit-title').innerText = "리스트 수정";
         document.getElementById('factionName').value = faction.name;
+        document.getElementById('factionRule').value = faction.rule || '';
+        
+        // 킬팀일 경우 팩션 룰 입력창 표시
+        if(currentGameKey === 'killteam') {
+            document.getElementById('killteam-rule-section').style.display = 'block';
+        } else {
+            document.getElementById('killteam-rule-section').style.display = 'none';
+        }
         
         renderPhases();
     }
 
     function initEditScreen() {
         document.getElementById('factionName').value = '';
+        document.getElementById('factionRule').value = '';
+        
+        // 킬팀일 경우 팩션 룰 입력창 표시
+        if(currentGameKey === 'killteam') {
+            document.getElementById('killteam-rule-section').style.display = 'block';
+        } else {
+            document.getElementById('killteam-rule-section').style.display = 'none';
+        }
+
         currentData = {};
         currentPhases.forEach(p => currentData[p] = []); 
         renderPhases();
@@ -349,7 +376,6 @@
             return;
         }
 
-        // 특정 페이즈 데이터가 없는 경우를 대비
         if (!currentData[phase]) currentData[phase] = [];
 
         currentData[phase].push({
@@ -390,6 +416,8 @@
 
     function saveFaction() {
         const factionName = document.getElementById('factionName').value.trim();
+        const factionRule = document.getElementById('factionRule').value.trim(); // 팩션 룰 데이터 읽기
+        
         if (!factionName) {
             alert('이름을 입력해주세요.');
             return;
@@ -399,11 +427,13 @@
             const newEntry = {
                 id: Date.now(),
                 name: factionName,
+                rule: factionRule, // 팩션 룰 저장
                 phases: currentData
             };
             savedFactions.push(newEntry);
         } else {
             savedFactions[editingIndex].name = factionName;
+            savedFactions[editingIndex].rule = factionRule; // 팩션 룰 수정 반영
             savedFactions[editingIndex].phases = currentData;
         }
 
@@ -437,6 +467,19 @@
                 </div>
                 
                 <div class="faction-content ${isActive}" id="faction-content-${factionIndex}">
+            `;
+
+            // 킬팀 전용 팩션 룰 표시 (입력된 내용이 있을 때만 렌더링)
+            if (currentGameKey === 'killteam' && faction.rule) {
+                html += `
+                    <div class="faction-rule-box">
+                        <strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong>
+                        <span style="font-size: 14px; color: var(--text-color);">${faction.rule}</span>
+                    </div>
+                `;
+            }
+
+            html += `
                     <div style="text-align: right; margin-bottom: 15px;">
                         <button class="btn-small btn-warning" onclick="event.stopPropagation(); resetChecks(${factionIndex})">
                             ⟳ 라운드 리셋 (체크 해제)
@@ -445,7 +488,6 @@
             `;
 
             let hasUnits = false;
-            // 선택된 게임의 페이즈 순서에 맞춰 렌더링
             currentPhases.forEach(phase => {
                 const units = faction.phases[phase] || [];
                 if (units.length > 0) {
@@ -468,7 +510,7 @@
                 }
             });
 
-            if(!hasUnits) {
+            if(!hasUnits && (!faction.rule || currentGameKey !== 'killteam')) {
                 html += `<p style="text-align:center; color:#7f8fa6; font-size:14px;">저장된 유닛/능력이 없습니다.</p>`;
             }
 
