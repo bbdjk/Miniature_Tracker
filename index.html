@@ -219,7 +219,7 @@
             margin-bottom: 4px; 
         }
 
-        /* 무기 정보 테이블 스타일 (아이콘 칸 추가됨) */
+        /* 무기 정보 테이블 스타일 */
         .weapon-table {
             width: 100%;
             margin-top: 8px;
@@ -449,7 +449,7 @@
     }
 
 
-    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 (아이콘 추가됨) ---
+    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 ---
     function addApRow(phase, value = '') {
         const container = document.getElementById(`ap-container-${phase}`);
         const div = document.createElement('div');
@@ -466,7 +466,6 @@
         const div = document.createElement('div');
         div.className = 'weapon-input-row';
         div.style.display = 'grid';
-        // 아이콘 선택(45px) 추가된 그리드
         div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1fr 2fr 30px';
         div.style.gap = '4px';
         div.style.marginBottom = '4px';
@@ -689,14 +688,15 @@
                 `;
             }
 
+            // 여기서 사진 첨부의 capture 속성을 뺐습니다.
             inputArea.innerHTML = `
                 ${baseInputHTML}
                 ${equipmentInputHTML}
                 
                 <div style="display:flex; align-items:center; margin-bottom:15px; gap: 10px;">
                     <label class="file-upload-label">
-                        📷 사진 첨부 (선택)
-                        <input type="file" id="unitImage-${phase}" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event, '${phase}')">
+                        📷 앨범/사진 첨부 (선택)
+                        <input type="file" id="unitImage-${phase}" accept="image/*" style="display:none;" onchange="handleImageSelect(event, '${phase}')">
                     </label>
                     <img id="preview-${phase}" src="" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:5px; border:1px solid #ccc;">
                     <span id="preview-text-${phase}" style="font-size:12px; color:#7f8fa6; display:none;">준비됨!</span>
@@ -812,7 +812,6 @@
             if(weaponContainer) {
                 const weaponRows = weaponContainer.querySelectorAll('.weapon-input-row');
                 weaponRows.forEach(row => {
-                    // 아이콘(타입) 수집 추가됨
                     const type = row.querySelector('.wep-type').value;
                     const name = row.querySelector('.wep-name').value.trim();
                     const atk = row.querySelector('.wep-atk').value.trim();
@@ -869,7 +868,6 @@
             if(wepContainer) {
                 wepContainer.innerHTML = '';
                 let wepList = item.weapons || [];
-                // 이전 버전 호환 처리 시 기본 아이콘 부여
                 if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
                     wepList.push({type: item.wepType||'🔫', name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
                 }
