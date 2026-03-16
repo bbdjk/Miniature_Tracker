@@ -160,11 +160,10 @@
         }
         .phase-content.active { display: block; }
 
-        /* 유닛 및 능력 리스트 아이템 */
+        /* 유닛 및 능력 리스트 아이템 (레이아웃 Block으로 변경하여 아래로 떨어지게 함) */
         .unit-item {
-            display: flex;
-            align-items: flex-start; 
-            padding: 10px;
+            display: block; 
+            padding: 15px 10px;
             border-bottom: 1px solid #f1f2f6;
             transition: all 0.2s ease;
         }
@@ -172,7 +171,7 @@
         
         .unit-checkbox {
             margin-right: 15px;
-            margin-top: 5px; 
+            margin-top: 3px; 
             transform: scale(1.5);
             cursor: pointer;
             flex-shrink: 0;
@@ -185,38 +184,35 @@
             border-radius: 8px;
             object-fit: cover;
             margin-right: 15px;
-            margin-top: 5px;
             background-color: #ecf0f1;
             flex-shrink: 0;
             border: 1px solid #bdc3c7;
             cursor: pointer; 
         }
-
-        .unit-details { flex-grow: 1; margin-top: 2px; }
         
         .unit-name {
             font-weight: bold;
             font-size: 16px;
-            margin-bottom: 4px;
             display: block;
             cursor: pointer;
             white-space: pre-wrap; 
             word-break: break-all; 
             color: var(--primary-color);
+            margin: 0;
         }
         .unit-ability {
             font-size: 14px;
             color: #7f8fa6;
             white-space: pre-wrap; 
             word-break: break-all; 
-            margin-bottom: 4px; 
+            margin-bottom: 6px; 
         }
         .unit-equipment {
             font-size: 14px;
             color: #7f8fa6;
             white-space: pre-wrap; 
             word-break: break-all; 
-            margin-bottom: 4px; 
+            margin-bottom: 6px; 
         }
 
         /* 무기 정보 테이블 스타일 */
@@ -688,7 +684,6 @@
                 `;
             }
 
-            // 여기서 사진 첨부의 capture 속성을 뺐습니다.
             inputArea.innerHTML = `
                 ${baseInputHTML}
                 ${equipmentInputHTML}
@@ -904,6 +899,7 @@
                 let equipmentHTML = '';
                 let weaponHTML = '';
 
+                // 레이아웃 분리: 상단(이미지+이름+버튼), 하단(능력+장비+무기)
                 if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                     let apArray = item.apAbilities || [];
                     if (item.equipment) apArray.push(item.equipment);
@@ -945,26 +941,31 @@
                          ondrop="drop(event, '${phase}', ${index})" 
                          ondragend="dragEnd(event)">
                          
-                        <div style="display:flex; align-items:center; padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal;">≡</div>
-                        
-                        ${imgTag}
-                        
-                        <div class="unit-details">
-                            <div class="unit-name">${index + 1}. ${item.name}</div>
+                        <div style="display:flex; align-items:flex-start; width:100%;">
+                            <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
+                            
+                            ${imgTag}
+                            
+                            <div style="flex-grow:1; padding-top: 4px;">
+                                <div class="unit-name">${index + 1}. ${item.name}</div>
+                            </div>
+                            
+                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
+                                <div style="display:flex; gap:2px; width: 100%;">
+                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitUp('${phase}', ${index})">▲</button>
+                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitDown('${phase}', ${index})">▼</button>
+                                </div>
+                                <div style="display:flex; gap:2px; width: 100%;">
+                                    <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editUnitItem('${phase}', ${index})">수정</button>
+                                    <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 12px; width: 100%;">
                             ${abilityHTML}
                             ${equipmentHTML}
                             ${weaponHTML}
-                        </div>
-                        
-                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
-                            <div style="display:flex; gap:2px; width: 100%;">
-                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitUp('${phase}', ${index})">▲</button>
-                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitDown('${phase}', ${index})">▼</button>
-                            </div>
-                            <div style="display:flex; gap:2px; width: 100%;">
-                                <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editUnitItem('${phase}', ${index})">수정</button>
-                                <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeUnit('${phase}', ${index})">삭제</button>
-                            </div>
                         </div>
                     </div>
                 `;
@@ -1062,9 +1063,7 @@
                         const isChecked = u.checked ? 'checked' : '';
                         
                         const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
-                        
                         let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability}</div>` : '';
-                        
                         let equipmentHTML = '';
                         let weaponHTML = '';
 
@@ -1104,10 +1103,15 @@
 
                         html += `
                             <div class="unit-item" onclick="event.stopPropagation()">
-                                <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
-                                ${imgTag}
-                                <div class="unit-details">
-                                    <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name}</label>
+                                <div style="display:flex; align-items:flex-start; width:100%;">
+                                    <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
+                                    ${imgTag}
+                                    <div style="flex-grow:1; padding-top: 4px;">
+                                        <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name}</label>
+                                    </div>
+                                </div>
+
+                                <div style="margin-top: 12px; width: 100%;">
                                     ${abilityHTML}
                                     ${equipmentHTML}
                                     ${weaponHTML}
