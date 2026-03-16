@@ -111,10 +111,10 @@
             border-radius: 6px;
             margin-bottom: 15px;
             border-left: 4px solid var(--accent-color);
-            white-space: pre-wrap; /* 줄바꿈 허용 */
+            white-space: pre-wrap; 
         }
 
-        /* 입력 폼 스타일 (input -> textarea로 변경됨) */
+        /* 입력 폼 스타일 */
         textarea.u-textarea {
             width: 100%;
             padding: 12px;
@@ -125,7 +125,7 @@
             box-sizing: border-box;
             font-size: 16px;
             font-family: inherit;
-            resize: vertical; /* 세로 크기 조절 허용 */
+            resize: vertical; 
         }
 
         /* 페이즈 아코디언 스타일 */
@@ -154,7 +154,7 @@
         /* 유닛 및 능력 리스트 아이템 */
         .unit-item {
             display: flex;
-            align-items: flex-start; /* 상단 정렬 */
+            align-items: flex-start; 
             padding: 10px;
             border-bottom: 1px solid #f1f2f6;
         }
@@ -162,51 +162,49 @@
         
         .unit-checkbox {
             margin-right: 15px;
-            margin-top: 15px; /* 이미지와 텍스트 중앙쯤에 오도록 조절 */
+            margin-top: 15px; 
             transform: scale(1.5);
             cursor: pointer;
             flex-shrink: 0;
         }
         
-        /* 이미지 썸네일 스타일 (크기 확대) */
+        /* 이미지 썸네일 스타일 */
         .unit-thumb {
-            width: 80px; /* 50px -> 80px로 확대 */
-            height: 80px; /* 50px -> 80px로 확대 */
+            width: 80px; 
+            height: 80px; 
             border-radius: 8px;
             object-fit: cover;
             margin-right: 15px;
             background-color: #ecf0f1;
             flex-shrink: 0;
             border: 1px solid #bdc3c7;
-            cursor: pointer; /* 터치 시 확대된다는 표시 */
+            cursor: pointer; 
         }
 
         .unit-details { flex-grow: 1; margin-top: 2px; }
         
-        /* 이름 및 능력 CSS 줄바꿈 속성 추가 */
         .unit-name {
             font-weight: bold;
             font-size: 16px;
             margin-bottom: 4px;
             display: block;
             cursor: pointer;
-            white-space: pre-wrap; /* 저장된 줄바꿈 표시 */
-            word-break: break-all; /* 너무 긴 단어 줄바꿈 */
+            white-space: pre-wrap; 
+            word-break: break-all; 
         }
         .unit-ability {
             font-size: 14px;
             color: #7f8fa6;
-            white-space: pre-wrap; /* 저장된 줄바꿈 표시 */
-            word-break: break-all; /* 너무 긴 단어 줄바꿈 */
-            margin-bottom: 4px; /* 장비 칸과의 간격 */
+            white-space: pre-wrap; 
+            word-break: break-all; 
+            margin-bottom: 4px; 
         }
-        /* 장비 스타일 추가 */
         .unit-equipment {
             font-size: 14px;
             color: #7f8fa6;
-            white-space: pre-wrap; /* 저장된 줄바꿈 표시 */
-            word-break: break-all; /* 너무 긴 단어 줄바꿈 */
-            margin-bottom: 4px; /* 하단 간격 */
+            white-space: pre-wrap; 
+            word-break: break-all; 
+            margin-bottom: 4px; 
         }
         
         /* 사진 첨부 버튼 스타일 */
@@ -224,35 +222,52 @@
         }
         .file-upload-label:active { background-color: #bdc3c7; }
 
-        /* --- 이미지 확대 모달(팝업) 스타일 --- */
-        #imageModal {
-            display: none; /* 기본 숨김 */
+        /* --- 모달(팝업) 공통 및 이미지 모달 스타일 --- */
+        .modal-overlay {
+            display: none; 
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background-color: var(--modal-bg);
-            z-index: 9999; /* 최상단 */
+            z-index: 9999; 
             justify-content: center;
             align-items: center;
-            cursor: pointer; /* 터치 시 닫기 */
         }
+        #imageModal { cursor: pointer; }
         #modalImage {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 90%; max-height: 90%;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            /* 저장된 이미지가 작더라도(150px) 선명하게 보여주는 설정 */
             image-rendering: pixelated; 
             image-rendering: crisp-edges;
+        }
+
+        /* 코드 입출력 모달 전용 박스 */
+        .code-modal-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 85%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
-<div id="imageModal" onclick="closeImageModal()">
+<div id="imageModal" class="modal-overlay" onclick="closeImageModal()">
     <img id="modalImage" src="" alt="유닛 확대 이미지">
+</div>
+
+<div id="codeModal" class="modal-overlay">
+    <div class="code-modal-box">
+        <h3 id="codeModalTitle" style="margin-top:0; color:var(--primary-color);">코드 복사/붙여넣기</h3>
+        <p id="codeModalDesc" style="font-size:13px; color:#7f8fa6; margin-bottom:10px;"></p>
+        <textarea id="codeModalText" class="u-textarea" rows="6" style="font-family:monospace; font-size:12px; margin-bottom:15px;"></textarea>
+        <div style="display:flex; gap:10px;">
+            <button id="codeModalActionBtn" class="btn" style="flex:1;">실행</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="closeCodeModal()">닫기</button>
+        </div>
+    </div>
 </div>
 
 <div class="container">
@@ -268,7 +283,7 @@
         
         <div class="card clickable-card" onclick="navToGame('killteam')">
             <h2>Kill Team</h2>
-            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 능력 리스트 보기</p>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 장비 리스트 보기</p>
         </div>
 
         <div class="card disabled">Warhammer 40,000 (준비 중)</div>
@@ -280,7 +295,10 @@
         <div class="header">
             <button class="btn btn-outline" onclick="navTo('screen-home')">◀ 메인</button>
             <h2 id="list-game-title">Game Title</h2>
-            <button class="btn" onclick="navTo('screen-edit')">＋ 추가</button>
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-outline" style="padding:8px 10px; font-size:14px;" onclick="openImportModal()">⬇️ 불러오기</button>
+                <button class="btn" style="padding:8px 10px; font-size:14px;" onclick="navTo('screen-edit')">＋ 추가</button>
+            </div>
         </div>
         <div id="faction-list-container">
             </div>
@@ -312,7 +330,6 @@
 </div>
 
 <script>
-    // 게임 설정
     const gameConfig = {
         spearhead: {
             title: "Spearhead",
@@ -322,7 +339,7 @@
         killteam: {
             title: "Kill Team",
             phases: ["Scouting Phase", "Initiative Phase", "Strategy Phase", "Firefight Phase"],
-            settingTitle: "터닝페이즈 별 유닛 능력 설정"
+            settingTitle: "터닝페이즈 별 유닛 장비 및 능력 설정"
         }
     };
 
@@ -333,25 +350,23 @@
     
     let currentGameKey = ''; 
     let currentPhases = []; 
-
     let tempImages = {}; 
 
-    // --- 이미지 확대 모달 함수 ---
-    function openImageModal(imgSrc) {
-        if(!imgSrc) return; // 이미지 없으면 반응 없음
-        const modal = document.getElementById('imageModal');
-        const modalImg = document.getElementById('modalImage');
-        modalImg.src = imgSrc;
-        modal.style.display = 'flex';
+    // 화면 전환
+    function navTo(screenId) {
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+
+        if (screenId === 'screen-edit') {
+            editingIndex = -1; 
+            document.getElementById('edit-title').innerText = "새 리스트 추가";
+            initEditScreen();
+        } else if (screenId === 'screen-list') {
+            renderFactionList();
+        }
     }
 
-    function closeImageModal() {
-        const modal = document.getElementById('imageModal');
-        modal.style.display = 'none';
-        document.getElementById('modalImage').src = ''; // 이미지 초기화
-    }
-    // ----------------------------
-
+    // 게임 진입
     function navToGame(gameKey) {
         currentGameKey = gameKey;
         const config = gameConfig[gameKey];
@@ -366,19 +381,98 @@
         navTo('screen-list');
     }
 
-    function navTo(screenId) {
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById(screenId).classList.add('active');
-
-        if (screenId === 'screen-edit') {
-            editingIndex = -1; 
-            document.getElementById('edit-title').innerText = "새 리스트 추가";
-            initEditScreen();
-        } else if (screenId === 'screen-list') {
-            renderFactionList();
-        }
+    // --- 이미지 모달 ---
+    function openImageModal(imgSrc) {
+        if(!imgSrc) return;
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modalImg.src = imgSrc;
+        modal.style.display = 'flex';
     }
 
+    function closeImageModal() {
+        document.getElementById('imageModal').style.display = 'none';
+        document.getElementById('modalImage').src = '';
+    }
+
+    // --- 개별 리스트 복사(내보내기) / 붙여넣기(불러오기) 모달 ---
+    function exportSingleFaction(index) {
+        const factionData = savedFactions[index];
+        // 다른 게임 코드가 섞이는 것을 방지하기 위해 gameKey 정보 포함
+        const exportObj = {
+            game: currentGameKey,
+            data: factionData
+        };
+        const code = btoa(encodeURIComponent(JSON.stringify(exportObj)));
+        
+        document.getElementById('codeModalTitle').innerText = '🚀 리스트 공유(코드)';
+        document.getElementById('codeModalDesc').innerText = '아래 코드를 복사하여 친구에게 주거나 다른 기기에서 불러오세요.';
+        
+        const textArea = document.getElementById('codeModalText');
+        textArea.value = code;
+        textArea.readOnly = true;
+        
+        const actionBtn = document.getElementById('codeModalActionBtn');
+        actionBtn.innerText = '📋 복사하기';
+        actionBtn.style.backgroundColor = '#27ae60';
+        actionBtn.onclick = function() {
+            textArea.select();
+            document.execCommand('copy');
+            alert('코드가 클립보드에 복사되었습니다!');
+            closeCodeModal();
+        };
+        
+        document.getElementById('codeModal').style.display = 'flex';
+    }
+
+    function openImportModal() {
+        document.getElementById('codeModalTitle').innerText = '⬇️ 리스트 불러오기';
+        document.getElementById('codeModalDesc').innerText = '복사해온 리스트 코드를 아래에 붙여넣어 추가하세요. (기존 리스트는 지워지지 않습니다!)';
+        
+        const textArea = document.getElementById('codeModalText');
+        textArea.value = '';
+        textArea.readOnly = false;
+        textArea.placeholder = '여기에 코드를 붙여넣으세요...';
+        
+        const actionBtn = document.getElementById('codeModalActionBtn');
+        actionBtn.innerText = '추가하기';
+        actionBtn.style.backgroundColor = 'var(--accent-color)';
+        actionBtn.onclick = function() {
+            const code = textArea.value.trim();
+            if(!code) { alert('코드를 입력하세요.'); return; }
+            try {
+                const jsonStr = decodeURIComponent(atob(code));
+                const importObj = JSON.parse(jsonStr);
+                
+                // 코드가 현재 열려있는 게임과 맞는지 검사
+                if(importObj.game !== currentGameKey) {
+                    alert(`⚠️ 올바르지 않은 코드입니다. 이 코드는 [${importObj.game}] 게임용 리스트입니다.`);
+                    return;
+                }
+                
+                // 리스트 고유 ID를 새로 부여해서 중복 충돌 방지
+                importObj.data.id = Date.now();
+                
+                // 기존 리스트를 보존하고 새로 불러온 리스트를 배열 맨 뒤에 추가
+                savedFactions.push(importObj.data);
+                localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+                
+                renderFactionList();
+                closeCodeModal();
+                alert(`'${importObj.data.name}' 리스트가 성공적으로 추가되었습니다!`);
+            } catch(e) {
+                alert('유효하지 않은 코드입니다. 코드가 전부 올바르게 복사되었는지 확인해주세요.');
+            }
+        };
+        
+        document.getElementById('codeModal').style.display = 'flex';
+    }
+
+    function closeCodeModal() {
+        document.getElementById('codeModal').style.display = 'none';
+    }
+
+    // --- 편집 화면 관련 로직 ---
     function editFaction(index) {
         editingIndex = index;
         const faction = savedFactions[index];
@@ -442,8 +536,6 @@
             inputArea.style.paddingTop = '10px';
             inputArea.style.borderTop = '1px dashed #ccc';
             
-            // 입력창들 textarea로 변경 및 rows 설정
-            // 킬팀일 경우 장비 칸 추가
             let equipmentInputHTML = '';
             if(currentGameKey === 'killteam') {
                 equipmentInputHTML = `<textarea id="unitEquipment-${phase}" class="u-textarea" placeholder="유닛 장비 (엔터 줄바꿈 가능)" rows="3"></textarea>`;
@@ -505,7 +597,7 @@
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                const MAX_SIZE = 150; // 저장 크기는 작게 유지
+                const MAX_SIZE = 150; 
                 let width = img.width;
                 let height = img.height;
 
@@ -549,7 +641,6 @@
 
         if (!currentData[phase]) currentData[phase] = [];
 
-        // 데이터에 image 정보(압축된 base64 문자열) 및 장비 정보 추가
         let unitData = {
             name: nameInput.value,
             ability: abilityInput.value,
@@ -561,7 +652,6 @@
         }
         currentData[phase].push(unitData);
 
-        // 입력창 및 이미지 미리보기 초기화
         nameInput.value = '';
         abilityInput.value = '';
         if(currentGameKey === 'killteam') {
@@ -577,17 +667,40 @@
         renderUnitsInEdit(phase);
     }
 
+    function editUnitItem(phase, index) {
+        const item = currentData[phase][index];
+        
+        document.getElementById(`unitName-${phase}`).value = item.name;
+        document.getElementById(`unitAbility-${phase}`).value = item.ability;
+        if(currentGameKey === 'killteam' && document.getElementById(`unitEquipment-${phase}`)) {
+            document.getElementById(`unitEquipment-${phase}`).value = item.equipment || '';
+        }
+
+        if(item.image) {
+            tempImages[phase] = item.image;
+            document.getElementById(`preview-${phase}`).src = item.image;
+            document.getElementById(`preview-${phase}`).style.display = 'block';
+            document.getElementById(`preview-text-${phase}`).style.display = 'inline-block';
+        } else {
+            tempImages[phase] = null;
+            document.getElementById(`preview-${phase}`).style.display = 'none';
+            document.getElementById(`preview-text-${phase}`).style.display = 'none';
+        }
+
+        currentData[phase].splice(index, 1);
+        renderUnitsInEdit(phase);
+        
+        document.getElementById(`unitName-${phase}`).focus();
+    }
+
     function renderUnitsInEdit(phase) {
         const listContainer = document.getElementById(`list-${phase}`);
         listContainer.innerHTML = '';
         
         if(currentData[phase]) {
             currentData[phase].forEach((item, index) => {
-                // 수정 화면 썸네일에도 openImageModal 클릭 이벤트 추가
-                // 크기 확대를 위해 class unit-thumb는 그대로 유지 (CSS에서 크기 조절됨)
                 const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
 
-                // 장비 정보 표시
                 let equipmentHTML = '';
                 if(currentGameKey === 'killteam' && item.equipment) {
                     equipmentHTML = `<div class="unit-equipment"><strong style="color: var(--primary-color);">[장비]</strong> ${item.equipment}</div>`;
@@ -601,7 +714,10 @@
                             <div class="unit-ability" style="margin-bottom:0;">${item.ability}</div>
                             ${equipmentHTML}
                         </div>
-                        <button class="btn-small btn-outline" style="border:none; color:red;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="editUnitItem('${phase}', ${index})">수정</button>
+                            <button class="btn-small btn-outline" style="border:none; color:red; padding:5px;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                        </div>
                     </div>
                 `;
             });
@@ -659,7 +775,8 @@
             let html = `
                 <div class="faction-header" onclick="toggleFactionContent(${factionIndex})">
                     <h3 style="margin:0; white-space: pre-wrap;">${faction.name} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
-                    <div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-small btn-outline" style="border:none; color:#27ae60; padding:5px; font-weight:bold;" onclick="event.stopPropagation(); exportSingleFaction(${factionIndex})">공유</button>
                         <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); editFaction(${factionIndex})">수정</button>
                         <button class="btn-small btn-outline" style="border:none; color:var(--danger-color); padding:5px;" onclick="event.stopPropagation(); deleteFaction(${factionIndex})">삭제</button>
                     </div>
@@ -696,11 +813,8 @@
                         const checkboxId = `chk-${factionIndex}-${phase}-${unitIndex}`;
                         const isChecked = u.checked ? 'checked' : '';
                         
-                        // 메인 리스트 썸네일에도 openImageModal 클릭 이벤트 추가
-                        // 크기 확대를 위해 class unit-thumb는 그대로 유지 (CSS에서 크기 조절됨)
                         const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
                         
-                        // 장비 정보 표시
                         let equipmentHTML = '';
                         if(currentGameKey === 'killteam' && u.equipment) {
                             equipmentHTML = `<div class="unit-equipment"><strong style="color: var(--primary-color);">[장비]</strong> ${u.equipment}</div>`;
@@ -757,7 +871,6 @@
         }
     }
 
-    // PWA 서비스 워커 등록 스크립트
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js').then(reg => {
