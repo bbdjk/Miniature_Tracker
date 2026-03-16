@@ -127,6 +127,16 @@
             resize: vertical; 
         }
 
+        input.u-input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #dcdde1;
+            border-radius: 4px;
+            font-size: 13px; 
+            font-family: inherit;
+        }
+
         /* 페이즈 아코디언 스타일 */
         .phase-header {
             background-color: var(--secondary-color);
@@ -161,7 +171,7 @@
         
         .unit-checkbox {
             margin-right: 15px;
-            margin-top: 15px; 
+            margin-top: 5px; 
             transform: scale(1.5);
             cursor: pointer;
             flex-shrink: 0;
@@ -174,6 +184,7 @@
             border-radius: 8px;
             object-fit: cover;
             margin-right: 15px;
+            margin-top: 5px;
             background-color: #ecf0f1;
             flex-shrink: 0;
             border: 1px solid #bdc3c7;
@@ -190,6 +201,7 @@
             cursor: pointer;
             white-space: pre-wrap; 
             word-break: break-all; 
+            color: var(--primary-color);
         }
         .unit-ability {
             font-size: 14px;
@@ -204,6 +216,37 @@
             white-space: pre-wrap; 
             word-break: break-all; 
             margin-bottom: 4px; 
+        }
+
+        /* 무기 정보 테이블 스타일 */
+        .weapon-table {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            border: 1px solid #dcdde1;
+            border-radius: 6px;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .weapon-table-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 2fr;
+            background-color: #f1f2f6;
+            padding: 6px 4px;
+            text-align: center;
+            font-weight: bold;
+            color: #7f8fa6;
+            font-size: 11px;
+        }
+        .weapon-table-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr 1fr 2fr;
+            padding: 8px 4px;
+            text-align: center;
+            align-items: center;
+            word-break: break-all;
+            background-color: #ffffff;
+            border-top: 1px solid #f1f2f6;
         }
         
         /* 사진 첨부 버튼 스타일 */
@@ -221,7 +264,7 @@
         }
         .file-upload-label:active { background-color: #bdc3c7; }
 
-        /* 모달(팝업) 공통 및 이미지 모달 스타일 */
+        /* 모달 공통 */
         .modal-overlay {
             display: none; 
             position: fixed;
@@ -240,7 +283,6 @@
             image-rendering: crisp-edges;
         }
 
-        /* 코드 입출력 모달 전용 박스 */
         .code-modal-box {
             background-color: white;
             padding: 20px;
@@ -282,7 +324,7 @@
         
         <div class="card clickable-card" onclick="navToGame('killteam')">
             <h2>Kill Team</h2>
-            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 ap 능력 리스트 보기</p>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 무기 정보 리스트 보기</p>
         </div>
 
         <div class="card disabled">Warhammer 40,000 (준비 중)</div>
@@ -310,8 +352,8 @@
             <button class="btn" onclick="saveFaction()">저장</button>
         </div>
         
-        <label for="factionName" style="font-weight:bold;">팩션(팀) 이름</label>
-        <textarea id="factionName" class="u-textarea" placeholder="이름을 입력하세요 (엔터로 줄바꿈 가능)" rows="2"></textarea>
+        <label for="factionName" style="font-weight:bold;">팩션(팀) 이름 <span style="color:red">*</span></label>
+        <textarea id="factionName" class="u-textarea" placeholder="이름을 입력하세요" rows="2"></textarea>
 
         <div id="killteam-rule-section" style="display:none;">
             <label for="factionRule" style="font-weight:bold; display:block; margin-top:5px;">팩션 룰</label>
@@ -320,7 +362,7 @@
 
         <div style="margin-top: 20px;">
             <h3 id="phase-settings-title">페이즈별 유닛 및 능력 설정</h3>
-            <p style="font-size:12px; color:#7f8fa6; margin-top:5px;">각 항목을 눌러 유닛과 능력을 추가하세요.</p>
+            <p style="font-size:12px; color:#e74c3c; margin-top:5px; font-weight:bold;">※ 유닛 이름만 필수이며, 나머지는 비워두셔도 됩니다.</p>
         </div>
 
         <div id="phases-container">
@@ -338,7 +380,7 @@
         killteam: {
             title: "Kill Team",
             phases: ["Scouting Phase", "Initiative Phase", "Strategy Phase", "Firefight Phase"],
-            settingTitle: "터닝페이즈 별 유닛 ap 능력 및 능력 설정"
+            settingTitle: "터닝페이즈 별 유닛 장비 및 능력 설정"
         }
     };
 
@@ -350,6 +392,38 @@
     let currentGameKey = ''; 
     let currentPhases = []; 
     let tempImages = {}; 
+
+    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 ---
+    function addApRow(phase, value = '') {
+        const container = document.getElementById(`ap-container-${phase}`);
+        const div = document.createElement('div');
+        div.style.position = 'relative';
+        div.innerHTML = `
+            <textarea class="u-textarea ap-input-${phase}" placeholder="ap 능력 (선택)" rows="2" style="margin-bottom:5px; padding-right:30px;">${value}</textarea>
+            <button class="btn-small" style="position:absolute; right:5px; top:5px; background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addWeaponRow(phase, wep = {name:'', atk:'', hit:'', dmg:'', wr:''}) {
+        const container = document.getElementById(`weapon-container-${phase}`);
+        const div = document.createElement('div');
+        div.className = `weapon-input-row-${phase}`;
+        div.style.display = 'grid';
+        div.style.gridTemplateColumns = '3fr 1fr 1fr 1fr 2fr 30px';
+        div.style.gap = '4px';
+        div.style.marginBottom = '4px';
+        div.style.alignItems = 'center';
+        div.innerHTML = `
+            <input type="text" class="u-input wep-name" placeholder="무기명" value="${wep.name}">
+            <input type="text" class="u-input wep-atk" placeholder="A" style="text-align:center;" value="${wep.atk}">
+            <input type="text" class="u-input wep-hit" placeholder="H" style="text-align:center;" value="${wep.hit}">
+            <input type="text" class="u-input wep-dmg" placeholder="D" style="text-align:center;" value="${wep.dmg}">
+            <input type="text" class="u-input wep-wr" placeholder="규칙" value="${wep.wr}">
+            <button class="btn-small" style="background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
+    }
 
     function navTo(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
@@ -522,20 +596,46 @@
             inputArea.style.paddingTop = '10px';
             inputArea.style.borderTop = '1px dashed #ccc';
             
+            // 기본 입력 (이름, 능력)
+            let baseInputHTML = `
+                <textarea id="unitName-${phase}" class="u-textarea" placeholder="유닛 이름 (필수)" rows="1" style="margin-bottom:5px; border-color:var(--accent-color);"></textarea>
+                <textarea id="unitAbility-${phase}" class="u-textarea" placeholder="사용할 능력 (선택)" rows="2" style="margin-bottom:5px;"></textarea>
+            `;
+
+            // 킬팀이면서 파이어파이트 페이즈일 경우에만 AP 및 무기 정보 양식 추가
             let equipmentInputHTML = '';
-            if(currentGameKey === 'killteam') {
-                /* 여기서 placeholder를 'ap 능력'으로 변경했습니다. */
-                equipmentInputHTML = `<textarea id="unitEquipment-${phase}" class="u-textarea" placeholder="ap 능력 (엔터 줄바꿈 가능)" rows="3"></textarea>`;
+            if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+                equipmentInputHTML = `
+                    <div style="background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <strong style="font-size:13px; color:var(--primary-color);">[AP 능력 (선택)]</strong>
+                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addApRow('${phase}')">＋ 추가</button>
+                        </div>
+                        <div id="ap-container-${phase}">
+                            </div>
+                    </div>
+                    
+                    <div style="background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <strong style="font-size:13px; color:var(--primary-color);">[무기 정보 (선택)]</strong>
+                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addWeaponRow('${phase}')">＋ 추가</button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
+                            <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div><div></div>
+                        </div>
+                        <div id="weapon-container-${phase}">
+                            </div>
+                    </div>
+                `;
             }
 
             inputArea.innerHTML = `
-                <textarea id="unitName-${phase}" class="u-textarea" placeholder="유닛 이름 (엔터 줄바꿈 가능)" rows="2"></textarea>
-                <textarea id="unitAbility-${phase}" class="u-textarea" placeholder="사용할 능력 (엔터 줄바꿈 가능)" rows="4"></textarea>
+                ${baseInputHTML}
                 ${equipmentInputHTML}
                 
                 <div style="display:flex; align-items:center; margin-bottom:15px; gap: 10px;">
                     <label class="file-upload-label">
-                        📷 사진 첨부
+                        📷 사진 첨부 (선택)
                         <input type="file" id="unitImage-${phase}" accept="image/*" capture="environment" style="display:none;" onchange="handleImageSelect(event, '${phase}')">
                     </label>
                     <img id="preview-${phase}" src="" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:5px; border:1px solid #ccc;">
@@ -551,6 +651,12 @@
             phaseWrapper.appendChild(header);
             phaseWrapper.appendChild(content);
             container.appendChild(phaseWrapper);
+
+            // 킬팀 & 파이어파이트 페이즈일 경우 초기 빈칸 1개씩 세팅
+            if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+                addApRow(phase);
+                addWeaponRow(phase);
+            }
 
             renderUnitsInEdit(phase);
         });
@@ -616,34 +722,58 @@
     function addUnit(phase) {
         const nameInput = document.getElementById(`unitName-${phase}`);
         const abilityInput = document.getElementById(`unitAbility-${phase}`);
-        let equipmentInput = null;
-        if(currentGameKey === 'killteam') {
-            equipmentInput = document.getElementById(`unitEquipment-${phase}`);
-        }
         
-        if (!nameInput.value.trim() || !abilityInput.value.trim()) {
-            alert('유닛 이름과 능력을 모두 입력해주세요.');
+        if (!nameInput.value.trim()) {
+            alert('유닛 이름은 필수입니다.');
+            nameInput.focus();
             return;
         }
 
         if (!currentData[phase]) currentData[phase] = [];
 
         let unitData = {
-            name: nameInput.value,
-            ability: abilityInput.value,
+            name: nameInput.value.trim(),
+            ability: abilityInput.value.trim(),
             image: tempImages[phase] || null, 
             checked: false
         };
-        if(currentGameKey === 'killteam') {
-            unitData.equipment = equipmentInput.value;
+
+        // 킬팀 & 파이어파이트 페이즈에서만 AP 및 무기 데이터 수집
+        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+            unitData.apAbilities = [];
+            const apInputs = document.querySelectorAll(`.ap-input-${phase}`);
+            apInputs.forEach(input => {
+                if(input.value.trim()) unitData.apAbilities.push(input.value.trim());
+            });
+
+            unitData.weapons = [];
+            const weaponRows = document.querySelectorAll(`.weapon-input-row-${phase}`);
+            weaponRows.forEach(row => {
+                const name = row.querySelector('.wep-name').value.trim();
+                const atk = row.querySelector('.wep-atk').value.trim();
+                const hit = row.querySelector('.wep-hit').value.trim();
+                const dmg = row.querySelector('.wep-dmg').value.trim();
+                const wr = row.querySelector('.wep-wr').value.trim();
+                
+                if(name || atk || hit || dmg || wr) {
+                    unitData.weapons.push({name, atk, hit, dmg, wr});
+                }
+            });
         }
+
         currentData[phase].push(unitData);
 
+        // 입력창 초기화
         nameInput.value = '';
         abilityInput.value = '';
-        if(currentGameKey === 'killteam') {
-            equipmentInput.value = '';
+        
+        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+            document.getElementById(`ap-container-${phase}`).innerHTML = '';
+            document.getElementById(`weapon-container-${phase}`).innerHTML = '';
+            addApRow(phase);
+            addWeaponRow(phase);
         }
+        
         tempImages[phase] = null;
         
         const fileInput = document.getElementById(`unitImage-${phase}`);
@@ -657,10 +787,25 @@
     function editUnitItem(phase, index) {
         const item = currentData[phase][index];
         
-        document.getElementById(`unitName-${phase}`).value = item.name;
-        document.getElementById(`unitAbility-${phase}`).value = item.ability;
-        if(currentGameKey === 'killteam' && document.getElementById(`unitEquipment-${phase}`)) {
-            document.getElementById(`unitEquipment-${phase}`).value = item.equipment || '';
+        document.getElementById(`unitName-${phase}`).value = item.name || '';
+        document.getElementById(`unitAbility-${phase}`).value = item.ability || '';
+        
+        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+            const apContainer = document.getElementById(`ap-container-${phase}`);
+            apContainer.innerHTML = '';
+            let apList = item.apAbilities || [];
+            if(item.equipment) apList.push(item.equipment); 
+            if(apList.length === 0) apList = [''];
+            apList.forEach(ap => addApRow(phase, ap));
+
+            const wepContainer = document.getElementById(`weapon-container-${phase}`);
+            wepContainer.innerHTML = '';
+            let wepList = item.weapons || [];
+            if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
+                wepList.push({name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
+            }
+            if(wepList.length === 0) wepList = [{name:'', atk:'', hit:'', dmg:'', wr:''}];
+            wepList.forEach(w => addWeaponRow(phase, w));
         }
 
         if(item.image) {
@@ -687,22 +832,56 @@
         if(currentData[phase]) {
             currentData[phase].forEach((item, index) => {
                 const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
-
+                
+                let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability}</div>` : '';
+                
                 let equipmentHTML = '';
-                if(currentGameKey === 'killteam' && item.equipment) {
-                    /* 여기서 말머리를 '[ap 능력]'으로 변경했습니다. */
-                    equipmentHTML = `<div class="unit-equipment"><strong style="color: var(--primary-color);">[ap 능력]</strong> ${item.equipment}</div>`;
+                let weaponHTML = '';
+
+                // 파이어파이트 페이즈일 경우에만 해당 스탯 표시 처리 (데이터가 있다면)
+                if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+                    let apArray = item.apAbilities || [];
+                    if (item.equipment) apArray.push(item.equipment);
+                    
+                    if (apArray.length > 0) {
+                        equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap}</div>`).join('');
+                    }
+                    
+                    let wepArray = item.weapons || [];
+                    if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
+                        wepArray.push({name: item.wepName, atk: item.wepAtk, hit: item.wepHit, dmg: item.wepDmg, wr: item.wepWr});
+                    }
+
+                    if (wepArray.length > 0) {
+                        weaponHTML = `
+                            <div class="weapon-table">
+                                <div class="weapon-table-header">
+                                    <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
+                                </div>
+                                ${wepArray.map(w => `
+                                <div class="weapon-table-row">
+                                    <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
+                                    <div>${w.atk || '-'}</div>
+                                    <div>${w.hit || '-'}</div>
+                                    <div>${w.dmg || '-'}</div>
+                                    <div style="font-size:11px;">${w.wr || '-'}</div>
+                                </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
                 }
 
                 listContainer.innerHTML += `
-                    <div class="unit-item" style="align-items:center;">
+                    <div class="unit-item">
                         ${imgTag}
                         <div class="unit-details">
-                            <div class="unit-name" style="margin-bottom:0;">${item.name}</div>
-                            <div class="unit-ability" style="margin-bottom:0;">${item.ability}</div>
+                            <div class="unit-name">${index + 1}. ${item.name}</div>
+                            ${abilityHTML}
                             ${equipmentHTML}
+                            ${weaponHTML}
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:5px;">
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px;">
                             <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="editUnitItem('${phase}', ${index})">수정</button>
                             <button class="btn-small btn-outline" style="border:none; color:red; padding:5px;" onclick="removeUnit('${phase}', ${index})">삭제</button>
                         </div>
@@ -722,7 +901,7 @@
         const factionRule = document.getElementById('factionRule').value.trim(); 
         
         if (!factionName) {
-            alert('이름을 입력해주세요.');
+            alert('팩션(팀) 이름을 입력해주세요.');
             return;
         }
 
@@ -803,10 +982,43 @@
                         
                         const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
                         
+                        let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability}</div>` : '';
+                        
                         let equipmentHTML = '';
-                        if(currentGameKey === 'killteam' && u.equipment) {
-                            /* 여기서도 말머리를 '[ap 능력]'으로 변경했습니다. */
-                            equipmentHTML = `<div class="unit-equipment"><strong style="color: var(--primary-color);">[ap 능력]</strong> ${u.equipment}</div>`;
+                        let weaponHTML = '';
+
+                        // 파이어파이트 페이즈에서만 노출
+                        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+                            let apArray = u.apAbilities || [];
+                            if (u.equipment) apArray.push(u.equipment); 
+                            
+                            if (apArray.length > 0) {
+                                equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap}</div>`).join('');
+                            }
+                            
+                            let wepArray = u.weapons || [];
+                            if(u.wepName || u.wepAtk || u.wepHit || u.wepDmg || u.wepWr) {
+                                wepArray.push({name: u.wepName, atk: u.wepAtk, hit: u.wepHit, dmg: u.wepDmg, wr: u.wepWr});
+                            }
+
+                            if (wepArray.length > 0) {
+                                weaponHTML = `
+                                    <div class="weapon-table">
+                                        <div class="weapon-table-header">
+                                            <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
+                                        </div>
+                                        ${wepArray.map(w => `
+                                        <div class="weapon-table-row">
+                                            <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
+                                            <div>${w.atk || '-'}</div>
+                                            <div>${w.hit || '-'}</div>
+                                            <div>${w.dmg || '-'}</div>
+                                            <div style="font-size:11px;">${w.wr || '-'}</div>
+                                        </div>
+                                        `).join('')}
+                                    </div>
+                                `;
+                            }
                         }
 
                         html += `
@@ -814,9 +1026,10 @@
                                 <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
                                 ${imgTag}
                                 <div class="unit-details">
-                                    <label for="${checkboxId}" class="unit-name">${u.name}</label>
-                                    <div class="unit-ability">${u.ability}</div>
+                                    <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name}</label>
+                                    ${abilityHTML}
                                     ${equipmentHTML}
+                                    ${weaponHTML}
                                 </div>
                             </div>
                         `;
