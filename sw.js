@@ -1,4 +1,4 @@
-const CACHE_NAME = 'game-tracker-v1';
+const CACHE_NAME = 'game-tracker-v1.1';
 const FILES_TO_CACHE = [
   './',
   './index.html',
