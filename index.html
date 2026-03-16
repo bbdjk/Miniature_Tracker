@@ -166,6 +166,7 @@
             align-items: flex-start; 
             padding: 10px;
             border-bottom: 1px solid #f1f2f6;
+            transition: all 0.2s ease;
         }
         .unit-item:last-child { border-bottom: none; }
         
@@ -393,13 +394,69 @@
     let currentPhases = []; 
     let tempImages = {}; 
 
-    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 ---
+    // --- 드래그 앤 드롭 함수 ---
+    let draggedItem = null;
+
+    function dragStart(e, phase, index) {
+        draggedItem = { phase: phase, index: index };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+        setTimeout(() => { e.target.style.opacity = '0.4'; }, 0);
+    }
+
+    function dragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function drop(e, targetPhase, targetIndex) {
+        e.preventDefault();
+        e.target.style.opacity = '1';
+        
+        if (draggedItem && draggedItem.phase === targetPhase && draggedItem.index !== targetIndex) {
+            const arr = currentData[targetPhase];
+            const itemToMove = arr.splice(draggedItem.index, 1)[0];
+            arr.splice(targetIndex, 0, itemToMove);
+            renderUnitsInEdit(targetPhase);
+        }
+        draggedItem = null;
+    }
+
+    function dragEnd(e) {
+        e.target.style.opacity = '1';
+        draggedItem = null;
+    }
+
+    // --- 화살표 순서 변경 함수 ---
+    function moveUnitUp(phase, index) {
+        if (index > 0) {
+            const arr = currentData[phase];
+            const temp = arr[index];
+            arr[index] = arr[index - 1];
+            arr[index - 1] = temp;
+            renderUnitsInEdit(phase);
+        }
+    }
+
+    function moveUnitDown(phase, index) {
+        const arr = currentData[phase];
+        if (index < arr.length - 1) {
+            const temp = arr[index];
+            arr[index] = arr[index + 1];
+            arr[index + 1] = temp;
+            renderUnitsInEdit(phase);
+        }
+    }
+
+
+    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 (버그 수정됨) ---
+    // 클래스 이름에 띄어쓰기가 들어가지 않도록 컨테이너 내부에서만 안전하게 찾도록 수정
     function addApRow(phase, value = '') {
         const container = document.getElementById(`ap-container-${phase}`);
         const div = document.createElement('div');
         div.style.position = 'relative';
         div.innerHTML = `
-            <textarea class="u-textarea ap-input-${phase}" placeholder="ap 능력 (선택)" rows="2" style="margin-bottom:5px; padding-right:30px;">${value}</textarea>
+            <textarea class="u-textarea ap-input" placeholder="ap 능력 (선택)" rows="2" style="margin-bottom:5px; padding-right:30px;">${value}</textarea>
             <button class="btn-small" style="position:absolute; right:5px; top:5px; background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
         `;
         container.appendChild(div);
@@ -408,7 +465,7 @@
     function addWeaponRow(phase, wep = {name:'', atk:'', hit:'', dmg:'', wr:''}) {
         const container = document.getElementById(`weapon-container-${phase}`);
         const div = document.createElement('div');
-        div.className = `weapon-input-row-${phase}`;
+        div.className = 'weapon-input-row';
         div.style.display = 'grid';
         div.style.gridTemplateColumns = '3fr 1fr 1fr 1fr 2fr 30px';
         div.style.gap = '4px';
@@ -596,13 +653,11 @@
             inputArea.style.paddingTop = '10px';
             inputArea.style.borderTop = '1px dashed #ccc';
             
-            // 기본 입력 (이름, 능력)
             let baseInputHTML = `
                 <textarea id="unitName-${phase}" class="u-textarea" placeholder="유닛 이름 (필수)" rows="1" style="margin-bottom:5px; border-color:var(--accent-color);"></textarea>
                 <textarea id="unitAbility-${phase}" class="u-textarea" placeholder="사용할 능력 (선택)" rows="2" style="margin-bottom:5px;"></textarea>
             `;
 
-            // 킬팀이면서 파이어파이트 페이즈일 경우에만 AP 및 무기 정보 양식 추가
             let equipmentInputHTML = '';
             if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                 equipmentInputHTML = `
@@ -652,7 +707,6 @@
             phaseWrapper.appendChild(content);
             container.appendChild(phaseWrapper);
 
-            // 킬팀 & 파이어파이트 페이즈일 경우 초기 빈칸 1개씩 세팅
             if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                 addApRow(phase);
                 addWeaponRow(phase);
@@ -738,32 +792,37 @@
             checked: false
         };
 
-        // 킬팀 & 파이어파이트 페이즈에서만 AP 및 무기 데이터 수집
+        // 여기서 각 컨테이너 내부의 클래스(.ap-input, .weapon-input-row)를 찾도록 안전하게 수정!
         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
             unitData.apAbilities = [];
-            const apInputs = document.querySelectorAll(`.ap-input-${phase}`);
-            apInputs.forEach(input => {
-                if(input.value.trim()) unitData.apAbilities.push(input.value.trim());
-            });
+            const apContainer = document.getElementById(`ap-container-${phase}`);
+            if(apContainer) {
+                const apInputs = apContainer.querySelectorAll('.ap-input');
+                apInputs.forEach(input => {
+                    if(input.value.trim()) unitData.apAbilities.push(input.value.trim());
+                });
+            }
 
             unitData.weapons = [];
-            const weaponRows = document.querySelectorAll(`.weapon-input-row-${phase}`);
-            weaponRows.forEach(row => {
-                const name = row.querySelector('.wep-name').value.trim();
-                const atk = row.querySelector('.wep-atk').value.trim();
-                const hit = row.querySelector('.wep-hit').value.trim();
-                const dmg = row.querySelector('.wep-dmg').value.trim();
-                const wr = row.querySelector('.wep-wr').value.trim();
-                
-                if(name || atk || hit || dmg || wr) {
-                    unitData.weapons.push({name, atk, hit, dmg, wr});
-                }
-            });
+            const weaponContainer = document.getElementById(`weapon-container-${phase}`);
+            if(weaponContainer) {
+                const weaponRows = weaponContainer.querySelectorAll('.weapon-input-row');
+                weaponRows.forEach(row => {
+                    const name = row.querySelector('.wep-name').value.trim();
+                    const atk = row.querySelector('.wep-atk').value.trim();
+                    const hit = row.querySelector('.wep-hit').value.trim();
+                    const dmg = row.querySelector('.wep-dmg').value.trim();
+                    const wr = row.querySelector('.wep-wr').value.trim();
+                    
+                    if(name || atk || hit || dmg || wr) {
+                        unitData.weapons.push({name, atk, hit, dmg, wr});
+                    }
+                });
+            }
         }
 
         currentData[phase].push(unitData);
 
-        // 입력창 초기화
         nameInput.value = '';
         abilityInput.value = '';
         
@@ -792,20 +851,24 @@
         
         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
             const apContainer = document.getElementById(`ap-container-${phase}`);
-            apContainer.innerHTML = '';
-            let apList = item.apAbilities || [];
-            if(item.equipment) apList.push(item.equipment); 
-            if(apList.length === 0) apList = [''];
-            apList.forEach(ap => addApRow(phase, ap));
+            if(apContainer) {
+                apContainer.innerHTML = '';
+                let apList = item.apAbilities || [];
+                if(item.equipment) apList.push(item.equipment); 
+                if(apList.length === 0) apList = [''];
+                apList.forEach(ap => addApRow(phase, ap));
+            }
 
             const wepContainer = document.getElementById(`weapon-container-${phase}`);
-            wepContainer.innerHTML = '';
-            let wepList = item.weapons || [];
-            if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
-                wepList.push({name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
+            if(wepContainer) {
+                wepContainer.innerHTML = '';
+                let wepList = item.weapons || [];
+                if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
+                    wepList.push({name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
+                }
+                if(wepList.length === 0) wepList = [{name:'', atk:'', hit:'', dmg:'', wr:''}];
+                wepList.forEach(w => addWeaponRow(phase, w));
             }
-            if(wepList.length === 0) wepList = [{name:'', atk:'', hit:'', dmg:'', wr:''}];
-            wepList.forEach(w => addWeaponRow(phase, w));
         }
 
         if(item.image) {
@@ -832,13 +895,10 @@
         if(currentData[phase]) {
             currentData[phase].forEach((item, index) => {
                 const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
-                
                 let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability}</div>` : '';
-                
                 let equipmentHTML = '';
                 let weaponHTML = '';
 
-                // 파이어파이트 페이즈일 경우에만 해당 스탯 표시 처리 (데이터가 있다면)
                 if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                     let apArray = item.apAbilities || [];
                     if (item.equipment) apArray.push(item.equipment);
@@ -873,17 +933,32 @@
                 }
 
                 listContainer.innerHTML += `
-                    <div class="unit-item">
+                    <div class="unit-item" draggable="true" 
+                         ondragstart="dragStart(event, '${phase}', ${index})" 
+                         ondragover="dragOver(event)" 
+                         ondrop="drop(event, '${phase}', ${index})" 
+                         ondragend="dragEnd(event)">
+                         
+                        <div style="display:flex; align-items:center; padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal;">≡</div>
+                        
                         ${imgTag}
+                        
                         <div class="unit-details">
                             <div class="unit-name">${index + 1}. ${item.name}</div>
                             ${abilityHTML}
                             ${equipmentHTML}
                             ${weaponHTML}
                         </div>
-                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px;">
-                            <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="editUnitItem('${phase}', ${index})">수정</button>
-                            <button class="btn-small btn-outline" style="border:none; color:red; padding:5px;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                        
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
+                            <div style="display:flex; gap:2px; width: 100%;">
+                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitUp('${phase}', ${index})">▲</button>
+                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitDown('${phase}', ${index})">▼</button>
+                            </div>
+                            <div style="display:flex; gap:2px; width: 100%;">
+                                <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editUnitItem('${phase}', ${index})">수정</button>
+                                <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -987,7 +1062,6 @@
                         let equipmentHTML = '';
                         let weaponHTML = '';
 
-                        // 파이어파이트 페이즈에서만 노출
                         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                             let apArray = u.apAbilities || [];
                             if (u.equipment) apArray.push(u.equipment); 
