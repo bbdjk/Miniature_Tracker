@@ -104,14 +104,13 @@
         }
         .faction-content.active { display: block; }
 
-        /* 팩션 룰 표시 박스 스타일 */
+        /* 팩션 룰 표시 박스 스타일 (여기서 불필요한 공백 렌더링 원인을 제거했습니다) */
         .faction-rule-box {
             background-color: #f8f9fa;
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 15px;
             border-left: 4px solid var(--accent-color);
-            white-space: pre-wrap; 
         }
 
         /* 입력 폼 스타일 */
@@ -222,7 +221,7 @@
         }
         .file-upload-label:active { background-color: #bdc3c7; }
 
-        /* --- 모달(팝업) 공통 및 이미지 모달 스타일 --- */
+        /* 모달(팝업) 공통 및 이미지 모달 스타일 */
         .modal-overlay {
             display: none; 
             position: fixed;
@@ -352,7 +351,6 @@
     let currentPhases = []; 
     let tempImages = {}; 
 
-    // 화면 전환
     function navTo(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -366,7 +364,6 @@
         }
     }
 
-    // 게임 진입
     function navToGame(gameKey) {
         currentGameKey = gameKey;
         const config = gameConfig[gameKey];
@@ -381,7 +378,6 @@
         navTo('screen-list');
     }
 
-    // --- 이미지 모달 ---
     function openImageModal(imgSrc) {
         if(!imgSrc) return;
         const modal = document.getElementById('imageModal');
@@ -395,14 +391,9 @@
         document.getElementById('modalImage').src = '';
     }
 
-    // --- 개별 리스트 복사(내보내기) / 붙여넣기(불러오기) 모달 ---
     function exportSingleFaction(index) {
         const factionData = savedFactions[index];
-        // 다른 게임 코드가 섞이는 것을 방지하기 위해 gameKey 정보 포함
-        const exportObj = {
-            game: currentGameKey,
-            data: factionData
-        };
+        const exportObj = { game: currentGameKey, data: factionData };
         const code = btoa(encodeURIComponent(JSON.stringify(exportObj)));
         
         document.getElementById('codeModalTitle').innerText = '🚀 리스트 공유(코드)';
@@ -444,16 +435,12 @@
                 const jsonStr = decodeURIComponent(atob(code));
                 const importObj = JSON.parse(jsonStr);
                 
-                // 코드가 현재 열려있는 게임과 맞는지 검사
                 if(importObj.game !== currentGameKey) {
                     alert(`⚠️ 올바르지 않은 코드입니다. 이 코드는 [${importObj.game}] 게임용 리스트입니다.`);
                     return;
                 }
                 
-                // 리스트 고유 ID를 새로 부여해서 중복 충돌 방지
                 importObj.data.id = Date.now();
-                
-                // 기존 리스트를 보존하고 새로 불러온 리스트를 배열 맨 뒤에 추가
                 savedFactions.push(importObj.data);
                 localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
                 
@@ -472,7 +459,6 @@
         document.getElementById('codeModal').style.display = 'none';
     }
 
-    // --- 편집 화면 관련 로직 ---
     function editFaction(index) {
         editingIndex = index;
         const faction = savedFactions[index];
@@ -786,10 +772,11 @@
             `;
 
             if (currentGameKey === 'killteam' && faction.rule) {
+                /* 여기서 줄바꿈 허용(white-space: pre-wrap)을 실제 텍스트가 들어가는 내부에만 적용했습니다 */
                 html += `
                     <div class="faction-rule-box">
                         <strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong>
-                        <span style="font-size: 14px; color: var(--text-color);">${faction.rule}</span>
+                        <div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule}</div>
                     </div>
                 `;
             }
