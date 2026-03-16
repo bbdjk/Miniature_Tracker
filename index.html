@@ -219,7 +219,7 @@
             margin-bottom: 4px; 
         }
 
-        /* 무기 정보 테이블 스타일 */
+        /* 무기 정보 테이블 스타일 (아이콘 칸 추가됨) */
         .weapon-table {
             width: 100%;
             margin-top: 8px;
@@ -231,7 +231,7 @@
         }
         .weapon-table-header {
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 2fr;
+            grid-template-columns: 30px 3fr 1fr 1fr 1fr 2fr;
             background-color: #f1f2f6;
             padding: 6px 4px;
             text-align: center;
@@ -241,7 +241,7 @@
         }
         .weapon-table-row {
             display: grid;
-            grid-template-columns: 3fr 1fr 1fr 1fr 2fr;
+            grid-template-columns: 30px 3fr 1fr 1fr 1fr 2fr;
             padding: 8px 4px;
             text-align: center;
             align-items: center;
@@ -449,8 +449,7 @@
     }
 
 
-    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 (버그 수정됨) ---
-    // 클래스 이름에 띄어쓰기가 들어가지 않도록 컨테이너 내부에서만 안전하게 찾도록 수정
+    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 (아이콘 추가됨) ---
     function addApRow(phase, value = '') {
         const container = document.getElementById(`ap-container-${phase}`);
         const div = document.createElement('div');
@@ -462,16 +461,22 @@
         container.appendChild(div);
     }
 
-    function addWeaponRow(phase, wep = {name:'', atk:'', hit:'', dmg:'', wr:''}) {
+    function addWeaponRow(phase, wep = {type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}) {
         const container = document.getElementById(`weapon-container-${phase}`);
         const div = document.createElement('div');
         div.className = 'weapon-input-row';
         div.style.display = 'grid';
-        div.style.gridTemplateColumns = '3fr 1fr 1fr 1fr 2fr 30px';
+        // 아이콘 선택(45px) 추가된 그리드
+        div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1fr 2fr 30px';
         div.style.gap = '4px';
         div.style.marginBottom = '4px';
         div.style.alignItems = 'center';
+        
         div.innerHTML = `
+            <select class="u-input wep-type" style="padding:0; text-align:center; font-size:16px; cursor:pointer;">
+                <option value="🔫" ${wep.type === '🔫' ? 'selected' : ''}>🔫</option>
+                <option value="🗡️" ${wep.type === '🗡️' ? 'selected' : ''}>🗡️</option>
+            </select>
             <input type="text" class="u-input wep-name" placeholder="무기명" value="${wep.name}">
             <input type="text" class="u-input wep-atk" placeholder="A" style="text-align:center;" value="${wep.atk}">
             <input type="text" class="u-input wep-hit" placeholder="H" style="text-align:center;" value="${wep.hit}">
@@ -675,8 +680,8 @@
                             <strong style="font-size:13px; color:var(--primary-color);">[무기 정보 (선택)]</strong>
                             <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addWeaponRow('${phase}')">＋ 추가</button>
                         </div>
-                        <div style="display: grid; grid-template-columns: 3fr 1fr 1fr 1fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
-                            <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div><div></div>
+                        <div style="display: grid; grid-template-columns: 45px 3fr 1fr 1fr 1fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
+                            <div>Type</div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div><div></div>
                         </div>
                         <div id="weapon-container-${phase}">
                             </div>
@@ -792,7 +797,6 @@
             checked: false
         };
 
-        // 여기서 각 컨테이너 내부의 클래스(.ap-input, .weapon-input-row)를 찾도록 안전하게 수정!
         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
             unitData.apAbilities = [];
             const apContainer = document.getElementById(`ap-container-${phase}`);
@@ -808,6 +812,8 @@
             if(weaponContainer) {
                 const weaponRows = weaponContainer.querySelectorAll('.weapon-input-row');
                 weaponRows.forEach(row => {
+                    // 아이콘(타입) 수집 추가됨
+                    const type = row.querySelector('.wep-type').value;
                     const name = row.querySelector('.wep-name').value.trim();
                     const atk = row.querySelector('.wep-atk').value.trim();
                     const hit = row.querySelector('.wep-hit').value.trim();
@@ -815,7 +821,7 @@
                     const wr = row.querySelector('.wep-wr').value.trim();
                     
                     if(name || atk || hit || dmg || wr) {
-                        unitData.weapons.push({name, atk, hit, dmg, wr});
+                        unitData.weapons.push({type, name, atk, hit, dmg, wr});
                     }
                 });
             }
@@ -863,10 +869,11 @@
             if(wepContainer) {
                 wepContainer.innerHTML = '';
                 let wepList = item.weapons || [];
+                // 이전 버전 호환 처리 시 기본 아이콘 부여
                 if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
-                    wepList.push({name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
+                    wepList.push({type: item.wepType||'🔫', name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
                 }
-                if(wepList.length === 0) wepList = [{name:'', atk:'', hit:'', dmg:'', wr:''}];
+                if(wepList.length === 0) wepList = [{type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}];
                 wepList.forEach(w => addWeaponRow(phase, w));
             }
         }
@@ -909,17 +916,18 @@
                     
                     let wepArray = item.weapons || [];
                     if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
-                        wepArray.push({name: item.wepName, atk: item.wepAtk, hit: item.wepHit, dmg: item.wepDmg, wr: item.wepWr});
+                        wepArray.push({type: item.wepType||'🔫', name: item.wepName, atk: item.wepAtk, hit: item.wepHit, dmg: item.wepDmg, wr: item.wepWr});
                     }
 
                     if (wepArray.length > 0) {
                         weaponHTML = `
                             <div class="weapon-table">
                                 <div class="weapon-table-header">
-                                    <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
+                                    <div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
                                 </div>
                                 ${wepArray.map(w => `
                                 <div class="weapon-table-row">
+                                    <div style="font-size:16px;">${w.type || '🔫'}</div>
                                     <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
                                     <div>${w.atk || '-'}</div>
                                     <div>${w.hit || '-'}</div>
@@ -1072,17 +1080,18 @@
                             
                             let wepArray = u.weapons || [];
                             if(u.wepName || u.wepAtk || u.wepHit || u.wepDmg || u.wepWr) {
-                                wepArray.push({name: u.wepName, atk: u.wepAtk, hit: u.wepHit, dmg: u.wepDmg, wr: u.wepWr});
+                                wepArray.push({type: u.wepType||'🔫', name: u.wepName, atk: u.wepAtk, hit: u.wepHit, dmg: u.wepDmg, wr: u.wepWr});
                             }
 
                             if (wepArray.length > 0) {
                                 weaponHTML = `
                                     <div class="weapon-table">
                                         <div class="weapon-table-header">
-                                            <div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
+                                            <div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
                                         </div>
                                         ${wepArray.map(w => `
                                         <div class="weapon-table-row">
+                                            <div style="font-size:16px;">${w.type || '🔫'}</div>
                                             <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
                                             <div>${w.atk || '-'}</div>
                                             <div>${w.hit || '-'}</div>
