@@ -244,7 +244,7 @@
 
         <div id="kt-roster-phases-wrapper" style="display:none;">
             <h3 style="margin-top:10px;">페이즈별 유닛 배치</h3>
-            <p style="font-size:12px; color:#7f8fa6; margin-top:5px; margin-bottom:15px;">유닛 체크 시 모든 무기가 기본적으로 선택됩니다. 가져가지 않을 무기는 이름을 펼쳐서 체크 해제하세요.</p>
+            <p style="font-size:12px; color:#7f8fa6; margin-top:5px; margin-bottom:15px;">유닛 체크 시 해당 유닛과 무기가 추가됩니다. 가져가지 않을 무기는 이름을 펼쳐서 체크 해제하세요. 동일한 유닛을 더 쓰려면 <strong>[복제하기]</strong>를 누르세요.</p>
             <div id="kt-roster-phases-container"></div>
         </div>
     </div>
@@ -349,13 +349,9 @@
             if (!fac.id) { fac.id = generateId(); needsSave = true; }
             if (!fac.phases) {
                 fac.phases = {
-                    "Scouting Phase": [],
-                    "Initiative Phase": [],
-                    "Strategy Phase": [],
-                    "Firefight Phase": fac.units || []
+                    "Scouting Phase": [], "Initiative Phase": [], "Strategy Phase": [], "Firefight Phase": fac.units || []
                 };
-                delete fac.units;
-                needsSave = true;
+                delete fac.units; needsSave = true;
             }
         });
         if(needsSave) localStorage.setItem('killteam_db_factions', JSON.stringify(savedKtDbFactions));
@@ -677,6 +673,7 @@
             const apContainer = document.getElementById(`kt-db-ap-input-container-${safePhaseId}`);
             apContainer.innerHTML = '';
             let apList = item.apAbilities || [];
+            if(item.equipment) apList.push(item.equipment); 
             if(apList.length === 0) apList = [''];
             apList.forEach(ap => addKtDbApRow(safePhaseId, ap.trim()));
 
@@ -891,7 +888,7 @@
 
     
     // =========================================================================
-    // [2단계] 킬팀 로스터 관리 
+    // [2단계] 킬팀 로스터 관리 (무기 체크 호환성 및 수정 반영)
     // =========================================================================
 
     function initKtRosterEditScreen() {
@@ -924,6 +921,37 @@
         
         savedKtDbFactions = JSON.parse(localStorage.getItem('killteam_db_factions')) || [];
 
+        // --- 레거시 무기 데이터 업그레이드 ---
+        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(currentKtRoster.factionDbId));
+        if(dbFaction) {
+            gameConfig.killteam.phases.forEach(phase => {
+                if(currentKtRoster.phases[phase] && dbFaction.phases[phase]) {
+                    currentKtRoster.phases[phase].forEach(ru => {
+                        // 원본 DB 유닛을 찾아 전체 무기 목록을 동기화
+                        let dbUnit = dbFaction.phases[phase].find(du => du.id === ru.id);
+                        // 만약 DB에 없으면 원본이 삭제된 복제본일 수도 있음. 
+                        // 하지만 최초 생성본이라면 dbUnit이 잡힘.
+                        if(!dbUnit && currentKtRoster.phases[phase]) {
+                            // 원본이 DB에서 삭제되었거나 복제본인 경우, 로스터 안에서 첫번째(원본)를 찾음
+                            dbUnit = currentKtRoster.phases[phase].find(x => x.name === ru.name && x.ability === ru.ability);
+                        }
+
+                        if(dbUnit && dbUnit.weapons && ru.weapons && ru.weapons.length > 0 && ru.weapons[0].checked === undefined) {
+                            let upgradedWeapons = [];
+                            dbUnit.weapons.forEach(dw => {
+                                let isChecked = ru.weapons.some(rw => rw.name === dw.name && rw.atk === dw.atk && rw.hit === dw.hit);
+                                let newWep = JSON.parse(JSON.stringify(dw));
+                                newWep.checked = isChecked;
+                                upgradedWeapons.push(newWep);
+                            });
+                            ru.weapons = upgradedWeapons;
+                        }
+                    });
+                }
+            });
+        }
+        // ---------------------------------------
+
         const select = document.getElementById('ktRosterFactionSelect');
         select.innerHTML = '<option value="">팩션을 선택하세요</option>';
         
@@ -938,8 +966,40 @@
             select.innerHTML += `<option value="${currentKtRoster.factionDbId}" selected>(삭제된 팩션 데이터입니다)</option>`;
         }
 
-        renderKtRosterPhases(true); // Edit 모드
+        renderKtRosterPhases(true); 
         navTo('screen-kt-roster-edit');
+    }
+
+    function duplicateRosterUnit(phase, unitId) {
+        let select = document.getElementById('ktRosterFactionSelect');
+        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(select.value));
+        
+        let pool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
+        let sourceUnit = pool.find(u => u.id === unitId);
+        
+        if(!sourceUnit && currentKtRoster.phases[phase]) {
+            sourceUnit = currentKtRoster.phases[phase].find(u => u.id === unitId);
+        }
+        
+        if(sourceUnit) {
+            let newUnit = JSON.parse(JSON.stringify(sourceUnit));
+            newUnit.id = generateId(); 
+            if(newUnit.weapons) {
+                // 복제 시 기본적으로 모든 무기를 체크된 상태로 초기화
+                newUnit.weapons.forEach(w => w.checked = true); 
+            }
+            if(!currentKtRoster.phases[phase]) currentKtRoster.phases[phase] = [];
+            currentKtRoster.phases[phase].push(newUnit); 
+            renderKtRosterPhases(true); 
+        }
+    }
+
+    function removeDuplicatedRosterUnit(phase, unitId, event) {
+        if(event) event.stopPropagation();
+        if(currentKtRoster.phases[phase]) {
+            currentKtRoster.phases[phase] = currentKtRoster.phases[phase].filter(u => u.id !== unitId);
+            renderKtRosterPhases(true);
+        }
     }
 
     function renderKtRosterPhases(isEditMode = false) {
@@ -961,13 +1021,13 @@
             gameConfig.killteam.phases.forEach(p => currentKtRoster.phases[p] = []);
         }
 
-        // 아코디언 상태 보존
+        // 아코디언 상태 보존 (리렌더링 시 열림 유지)
+        let openDetails = [];
         let openPhases = [];
-        const existingContents = container.querySelectorAll('.phase-content');
-        existingContents.forEach((el, idx) => {
-            if(el.classList.contains('active')) openPhases.push(idx);
-        });
-        if(openPhases.length === 0 && !isEditMode) openPhases.push(0);
+        if (isEditMode) {
+            container.querySelectorAll('.phase-content.active').forEach(el => openPhases.push(el.id));
+            container.querySelectorAll('.detail-content.show').forEach(el => openDetails.push(el.id));
+        }
 
         container.innerHTML = '';
         wrapper.style.display = 'block';
@@ -980,22 +1040,33 @@
             
             const content = document.createElement('div');
             content.className = 'phase-content';
-            if(openPhases.includes(phaseIndex)) content.classList.add('active'); 
+            content.id = `roster-phase-content-${phaseIndex}`;
+            if(openPhases.includes(content.id) || (!isEditMode && phaseIndex === 0)) content.classList.add('active'); 
 
             header.onclick = () => togglePhase(content);
 
-            let unitPool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
-            if(unitPool.length === 0 && isEditMode && currentKtRoster.phases[phase]) {
-                unitPool = currentKtRoster.phases[phase];
+            let unitPool = [];
+            if (dbFaction && dbFaction.phases && dbFaction.phases[phase]) {
+                unitPool = JSON.parse(JSON.stringify(dbFaction.phases[phase]));
+                unitPool.forEach(u => u.isOriginal = true); 
+            }
+
+            if (currentKtRoster.phases[phase]) {
+                currentKtRoster.phases[phase].forEach(ru => {
+                    if (!unitPool.find(u => u.id === ru.id)) {
+                        ru.isOriginal = false; 
+                        unitPool.push(ru);
+                    }
+                });
             }
 
             if(!unitPool || unitPool.length === 0) {
                 content.innerHTML = '<p style="color:#7f8fa6; font-size:13px; text-align:center;">선택할 유닛이 없습니다.</p>';
             } else {
                 unitPool.forEach((u, uIndex) => {
-                    const checkboxId = `roster-chk-${phaseIndex}-${uIndex}`;
-                    const detailId = `roster-detail-${phaseIndex}-${uIndex}`;
-                    const iconId = `roster-icon-${phaseIndex}-${uIndex}`;
+                    const checkboxId = `roster-chk-${phaseIndex}-${u.id}`;
+                    const detailId = `roster-detail-${phaseIndex}-${u.id}`;
+                    const iconId = `roster-icon-${phaseIndex}-${u.id}`;
 
                     let rosterUnit = currentKtRoster.phases[phase].find(item => item.id === u.id);
                     const isChecked = rosterUnit ? true : false;
@@ -1004,6 +1075,16 @@
                     let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
                     let equipmentHTML = '';
                     let weaponHTML = '';
+
+                    const detailClass = openDetails.includes(detailId) ? 'detail-content show' : 'detail-content';
+                    const iconText = openDetails.includes(detailId) ? '▲ 접기' : '▼ 펼치기';
+
+                    let actionBtn = '';
+                    if (u.isOriginal) {
+                        actionBtn = `<button class="btn-small btn-outline" style="padding:2px 6px; font-size:11px; margin-left:10px; border-color:var(--primary-color); color:var(--primary-color);" onclick="event.stopPropagation(); duplicateRosterUnit('${phase}', '${u.id}')">복제하기</button>`;
+                    } else {
+                        actionBtn = `<button class="btn-small btn-outline" style="padding:2px 6px; font-size:11px; margin-left:10px; border-color:var(--danger-color); color:var(--danger-color);" onclick="removeDuplicatedRosterUnit('${phase}', '${u.id}', event)">제거</button>`;
+                    }
 
                     if(phase === 'Firefight Phase') {
                         let apArray = u.apAbilities || [];
@@ -1020,8 +1101,9 @@
                                     </div>
                                     ${wepArray.map((w, wIndex) => {
                                         let isWepChecked = false;
-                                        if(rosterUnit) {
-                                            isWepChecked = rosterUnit.weapons.some(rw => rw.name === w.name && rw.atk === w.atk && rw.hit === w.hit);
+                                        // 로스터에 저장된 유닛이면서, 해당 무기의 checked 속성이 false가 아닐 때만 체크됨
+                                        if(rosterUnit && rosterUnit.weapons && rosterUnit.weapons[wIndex]) {
+                                            isWepChecked = rosterUnit.weapons[wIndex].checked !== false;
                                         }
 
                                         return `
@@ -1051,11 +1133,14 @@
                             <div style="display:flex; align-items:center; width:100%;">
                                 <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleRosterUnit(this.checked, '${phase}', '${u.id}')" style="margin-top:0;">
                                 <div style="flex-grow:1; display:flex; justify-content:space-between; align-items:center; padding-left:10px; cursor:pointer;" onclick="toggleDetail('${detailId}', '${iconId}')">
-                                    <div class="unit-name" style="font-size:15px; margin:0;">${u.name ? u.name.trim() : ''}</div>
-                                    <div id="${iconId}" style="font-size:12px; color:#7f8fa6; font-weight:normal;">▼ 펼치기</div>
+                                    <div style="display:flex; align-items:center; flex-wrap:wrap;">
+                                        <label for="${checkboxId}" class="unit-name" style="margin:0; font-size:15px; cursor:pointer;">${u.name ? u.name.trim() : ''}</label>
+                                        ${actionBtn}
+                                    </div>
+                                    <div id="${iconId}" style="font-size:12px; color:#7f8fa6; font-weight:normal; flex-shrink:0;">${iconText}</div>
                                 </div>
                             </div>
-                            <div id="${detailId}" class="detail-content">
+                            <div id="${detailId}" class="${detailClass}">
                                 <div style="display:flex; width:100%;">
                                     ${imgTag}
                                     <div style="flex-grow:1;">
@@ -1093,6 +1178,10 @@
             if(unitToCopy) {
                 let newUnit = JSON.parse(JSON.stringify(unitToCopy));
                 newUnit.checked = false; 
+                // 새로 로스터에 추가될 때 모든 무기는 기본적으로 체크됨
+                if(newUnit.weapons) {
+                    newUnit.weapons.forEach(w => w.checked = true);
+                }
                 currentKtRoster.phases[phase].push(newUnit);
 
                 document.querySelectorAll(`.wep-chk-${unitId}`).forEach(chk => {
@@ -1105,35 +1194,21 @@
             document.querySelectorAll(`.wep-chk-${unitId}`).forEach(chk => {
                 chk.disabled = true; chk.checked = false;
             });
+
+            let select = document.getElementById('ktRosterFactionSelect');
+            let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(select.value));
+            let isOriginal = dbFaction && dbFaction.phases && dbFaction.phases[phase] && dbFaction.phases[phase].some(u => u.id === unitId);
+            if(!isOriginal) {
+                renderKtRosterPhases(true);
+            }
         }
     }
 
     function toggleRosterWeapon(isChecked, phase, unitId, wIndex) {
         let rosterUnit = currentKtRoster.phases[phase].find(u => u.id === unitId);
-        if(!rosterUnit) return;
-
-        let select = document.getElementById('ktRosterFactionSelect');
-        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(select.value));
-        
-        let pool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
-        if (pool.length === 0 && currentKtRoster.phases[phase]) {
-            pool = currentKtRoster.phases[phase]; 
-        }
-        
-        let dbUnit = pool.find(u => u.id === unitId);
-        if(!dbUnit) return;
-        let targetWeapon = dbUnit.weapons[wIndex];
-
-        if(isChecked) {
-            rosterUnit.weapons.push(JSON.parse(JSON.stringify(targetWeapon)));
-            rosterUnit.weapons.sort((a, b) => {
-                let idxA = dbUnit.weapons.findIndex(w => w.name === a.name && w.atk === a.atk && w.hit === a.hit);
-                let idxB = dbUnit.weapons.findIndex(w => w.name === b.name && w.atk === b.atk && w.hit === b.hit);
-                return idxA - idxB;
-            });
-        } else {
-            let wIndexToRemove = rosterUnit.weapons.findIndex(rw => rw.name === targetWeapon.name && rw.atk === targetWeapon.atk && rw.hit === targetWeapon.hit);
-            if(wIndexToRemove !== -1) rosterUnit.weapons.splice(wIndexToRemove, 1);
+        // rosterUnit.weapons 내부의 해당 무기 checked 상태를 직접 업데이트!
+        if(rosterUnit && rosterUnit.weapons && rosterUnit.weapons[wIndex]) {
+            rosterUnit.weapons[wIndex].checked = isChecked;
         }
     }
 
@@ -1149,7 +1224,9 @@
         currentKtRoster.factionDbId = factionId;
         
         let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(factionId));
-        if(dbFaction) currentKtRoster.rule = dbFaction.rule;
+        if(dbFaction) {
+            currentKtRoster.rule = dbFaction.rule;
+        }
 
         if (editingKtRosterIndex === -1) { savedFactions.push(currentKtRoster); } 
         else { savedFactions[editingKtRosterIndex] = currentKtRoster; }
@@ -1224,11 +1301,17 @@
 
                         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                             let apArray = u.apAbilities || [];
+                            if (u.equipment) apArray.push(u.equipment); 
+                            
                             if (apArray.length > 0) {
                                 equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                             }
                             
                             let wepArray = u.weapons || [];
+                            
+                            // *** 핵심: 체크 해제된 무기는 플레이 화면에서 필터링해서 보여주지 않음! ***
+                            wepArray = wepArray.filter(w => w.checked !== false);
+
                             if (wepArray.length > 0) {
                                 weaponHTML = `
                                     <div class="weapon-table">
