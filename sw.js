@@ -1,5 +1,5 @@
 // 버전을 v2, v3 식으로 코드를 수정할 때마다 올려주시면 폰이 새 버전임을 인식합니다.
-const CACHE_NAME = 'game-tracker-v3.9'; 
+const CACHE_NAME = 'game-tracker-v4.0'; 
 const FILES_TO_CACHE = [
   './',
   './index.html',
