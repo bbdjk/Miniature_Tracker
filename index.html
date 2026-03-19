@@ -10,7 +10,7 @@
     <link rel="apple-touch-icon" href="./icon.png">
 
     <style>
-        /* UI 및 폰트 통일 */
+        /* CSS 공통 스타일 */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #34495e;
@@ -38,11 +38,9 @@
             position: relative;
         }
 
-        /* 화면 전환용 클래스 */
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* 공통 헤더 */
         .header {
             display: flex;
             justify-content: space-between;
@@ -54,7 +52,6 @@
         
         h1, h2, h3 { margin: 0; color: var(--primary-color); }
 
-        /* 버튼 스타일 */
         .btn {
             background-color: var(--accent-color);
             color: white;
@@ -72,7 +69,6 @@
         .btn-warning { background-color: var(--warning-color); color: white; border: none; }
         .btn-warning:active { background-color: #d68910; }
 
-        /* 리스트 및 카드 스타일 */
         .card {
             background-color: var(--card-bg);
             padding: 15px;
@@ -80,31 +76,14 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        .card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background-color: #e8ecef;
-        }
+        .card.disabled { opacity: 0.5; cursor: not-allowed; background-color: #e8ecef; }
         .clickable-card { cursor: pointer; transition: transform 0.1s; }
         .clickable-card:active { transform: scale(0.98); }
 
-        /* 저장된 팩션 리스트 아코디언 스타일 */
-        .faction-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding: 5px 0;
-        }
-        .faction-content {
-            display: none; 
-            margin-top: 15px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-        }
+        .faction-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0; }
+        .faction-content { display: none; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
         .faction-content.active { display: block; }
 
-        /* 팩션 룰 표시 박스 스타일 */
         .faction-rule-box {
             background-color: #f8f9fa;
             padding: 12px;
@@ -113,195 +92,38 @@
             border-left: 4px solid var(--accent-color);
         }
 
-        /* 입력 폼 스타일 */
-        textarea.u-textarea {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #dcdde1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical; 
-        }
+        textarea.u-textarea { width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #dcdde1; border-radius: 6px; box-sizing: border-box; font-size: 16px; font-family: inherit; resize: vertical; }
+        input.u-input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #dcdde1; border-radius: 4px; font-size: 13px; font-family: inherit; }
+        select.u-select { width: 100%; padding: 6px 0; box-sizing: border-box; border: 1px solid #dcdde1; border-radius: 4px; font-size: 13px; font-family: inherit; text-align: center; text-align-last: center; background-color: white; cursor: pointer; }
 
-        input.u-input {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #dcdde1;
-            border-radius: 4px;
-            font-size: 13px; 
-            font-family: inherit;
-        }
-        
-        select.u-select {
-            width: 100%;
-            padding: 6px 0;
-            box-sizing: border-box;
-            border: 1px solid #dcdde1;
-            border-radius: 4px;
-            font-size: 13px;
-            font-family: inherit;
-            text-align: center;
-            text-align-last: center;
-            background-color: white;
-            cursor: pointer;
-        }
-
-        /* 페이즈 아코디언 스타일 */
-        .phase-header {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-        }
-        .phase-content {
-            display: none;
-            padding: 10px;
-            background-color: white;
-            border: 1px solid #dcdde1;
-            border-radius: 0 0 6px 6px;
-            margin-top: -5px;
-            margin-bottom: 15px;
-        }
+        .phase-header { background-color: var(--secondary-color); color: white; padding: 12px; border-radius: 6px; margin-bottom: 5px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; }
+        .phase-content { display: none; padding: 10px; background-color: white; border: 1px solid #dcdde1; border-radius: 0 0 6px 6px; margin-top: -5px; margin-bottom: 15px; }
         .phase-content.active { display: block; }
 
-        /* 유닛 및 능력 리스트 아이템 (레이아웃 Block으로 복구 - 여기서 오류가 났었습니다!) */
-        .unit-item {
-            display: block; 
-            padding: 15px 10px;
-            border-bottom: 1px solid #f1f2f6;
-            transition: all 0.2s ease;
-        }
+        .unit-item { display: block; padding: 15px 10px; border-bottom: 1px solid #f1f2f6; transition: all 0.2s ease; }
         .unit-item:last-child { border-bottom: none; }
+        .unit-checkbox { margin-right: 15px; margin-top: 3px; transform: scale(1.5); cursor: pointer; flex-shrink: 0; }
         
-        .unit-checkbox {
-            margin-right: 15px;
-            margin-top: 3px; 
-            transform: scale(1.5);
-            cursor: pointer;
-            flex-shrink: 0;
-        }
+        .unit-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; margin-right: 15px; background-color: #ecf0f1; flex-shrink: 0; border: 1px solid #bdc3c7; cursor: pointer; }
         
-        /* 이미지 썸네일 스타일 */
-        .unit-thumb {
-            width: 80px; 
-            height: 80px; 
-            border-radius: 8px;
-            object-fit: cover;
-            margin-right: 15px;
-            background-color: #ecf0f1;
-            flex-shrink: 0;
-            border: 1px solid #bdc3c7;
-            cursor: pointer; 
-        }
-        
-        .unit-name {
-            font-weight: bold;
-            font-size: 16px;
-            display: block;
-            cursor: pointer;
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            color: var(--primary-color);
-            margin: 0;
-        }
-        .unit-ability {
-            font-size: 14px;
-            color: #7f8fa6;
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            margin-bottom: 6px; 
-        }
-        .unit-equipment {
-            font-size: 14px;
-            color: #7f8fa6;
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            margin-bottom: 6px; 
-        }
+        .unit-name { font-weight: bold; font-size: 16px; display: block; cursor: pointer; white-space: pre-wrap; word-break: break-all; color: var(--primary-color); margin: 0; }
+        .unit-ability { font-size: 14px; color: #7f8fa6; white-space: pre-wrap; word-break: break-all; margin-bottom: 6px; }
+        .unit-equipment { font-size: 14px; color: #7f8fa6; white-space: pre-wrap; word-break: break-all; margin-bottom: 6px; }
 
-        /* 무기 정보 테이블 스타일 */
-        .weapon-table {
-            width: 100%;
-            margin-top: 8px;
-            margin-bottom: 4px;
-            border: 1px solid #dcdde1;
-            border-radius: 6px;
-            overflow: hidden;
-            font-size: 13px;
-        }
-        .weapon-table-header {
-            display: grid;
-            grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;
-            background-color: #f1f2f6;
-            padding: 6px 4px;
-            text-align: center;
-            font-weight: bold;
-            color: #7f8fa6;
-            font-size: 11px;
-        }
-        .weapon-table-row {
-            display: grid;
-            grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;
-            padding: 8px 4px;
-            text-align: center;
-            align-items: center;
-            word-break: break-all;
-            background-color: #ffffff;
-            border-top: 1px solid #f1f2f6;
-        }
+        .weapon-table { width: 100%; margin-top: 8px; margin-bottom: 4px; border: 1px solid #dcdde1; border-radius: 6px; overflow: hidden; font-size: 13px; }
+        .weapon-table-header { display: grid; grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr; background-color: #f1f2f6; padding: 6px 4px; text-align: center; font-weight: bold; color: #7f8fa6; font-size: 11px; }
+        .weapon-table-row { display: grid; grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr; padding: 8px 4px; text-align: center; align-items: center; word-break: break-all; background-color: #ffffff; border-top: 1px solid #f1f2f6; }
         
-        /* 사진 첨부 버튼 스타일 */
-        .file-upload-label {
-            display: inline-block;
-            background-color: #ecf0f1;
-            color: var(--primary-color);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid #bdc3c7;
-        }
+        .file-upload-label { display: inline-block; background-color: #ecf0f1; color: var(--primary-color); padding: 8px 12px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: bold; text-align: center; border: 1px solid #bdc3c7; }
         .file-upload-label:active { background-color: #bdc3c7; }
 
-        /* 모달 공통 */
-        .modal-overlay {
-            display: none; 
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: var(--modal-bg);
-            z-index: 9999; 
-            justify-content: center;
-            align-items: center;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--modal-bg); z-index: 9999; justify-content: center; align-items: center; }
         #imageModal { cursor: pointer; }
-        #modalImage {
-            max-width: 90%; max-height: 90%;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            image-rendering: pixelated; 
-            image-rendering: crisp-edges;
-        }
+        #modalImage { max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); image-rendering: pixelated; image-rendering: crisp-edges; }
+        .code-modal-box { background-color: white; padding: 20px; border-radius: 10px; width: 85%; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
 
-        .code-modal-box {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 85%;
-            max-width: 400px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
+        .detail-content { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
+        .detail-content.show { display: block; }
     </style>
 </head>
 <body>
@@ -333,27 +155,98 @@
             <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">팩션 리스트 보기</p>
         </div>
         
-        <div class="card clickable-card" onclick="navToGame('killteam')">
+        <div class="card clickable-card" onclick="navTo('screen-kt-hub')">
             <h2>Kill Team</h2>
-            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">오퍼레이티브 및 무기 정보 리스트 보기</p>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">팩션 관리 및 로스터 짜기</p>
         </div>
 
         <div class="card disabled">Warhammer 40,000 (준비 중)</div>
         <div class="card disabled">Age of Sigmar (준비 중)</div>
-        <div class="card disabled">Obsidian Protocol (준비 중)</div>
+    </div>
+
+    <div id="screen-kt-hub" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-home')">◀ 메인</button>
+            <h2>Kill Team</h2>
+            <div style="width: 50px;"></div>
+        </div>
+        
+        <div class="card clickable-card" style="border: 2px solid var(--accent-color);" onclick="openKtDbList()">
+            <h3 style="color:var(--accent-color);">1. 팩션 리스트 설정 (DB)</h3>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">로스터를 짜기 위한 팩션(팀) 룰과 요원들의 풀을 미리 저장합니다.</p>
+        </div>
+        
+        <div class="card clickable-card" onclick="openKtRosterList()">
+            <h3>2. 로스터 리스트</h3>
+            <p style="margin:5px 0 0; color:#7f8fa6; font-size:14px;">저장된 팩션 DB를 불러와 실제 게임에 사용할 페이즈별 로스터를 편성합니다.</p>
+        </div>
+    </div>
+
+    <div id="screen-kt-db-list" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-kt-hub')">◀ 뒤로</button>
+            <h2>팩션 리스트 설정</h2>
+            <div style="display:flex; gap:5px;">
+                <button class="btn btn-outline" style="padding:8px 10px; font-size:14px;" onclick="openImportModal('killteam_db')">⬇️ 불러오기</button>
+                <button class="btn" style="padding:8px 10px; font-size:14px;" onclick="initKtDbEditScreen()">＋ 추가</button>
+            </div>
+        </div>
+        <p style="font-size:13px; color:#e74c3c; margin-top:-10px;">※ 이곳은 유닛들의 정보를 미리 등록해두는 '창고'입니다.</p>
+        <div id="kt-db-list-container"></div>
+    </div>
+
+    <div id="screen-kt-db-edit" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-kt-db-list')">취소</button>
+            <h2 id="kt-db-edit-title">팩션 DB 등록</h2>
+            <button class="btn" onclick="saveKtDbFaction()">저장</button>
+        </div>
+        
+        <label style="font-weight:bold;">팩션(팀) 이름 <span style="color:red">*</span></label>
+        <textarea id="ktDbFactionName" class="u-textarea" placeholder="이름을 입력하세요" rows="2"></textarea>
+
+        <label style="font-weight:bold; display:block;">팩션 룰</label>
+        <textarea id="ktDbFactionRule" class="u-textarea" placeholder="간단한 팩션 룰을 적어주세요" rows="3"></textarea>
+
+        <div style="margin-top: 20px;">
+            <h3 style="color:var(--primary-color);">페이즈별 유닛 (오퍼레이티브) 등록</h3>
+            <p style="font-size:12px; color:#e74c3c; margin-top:5px; font-weight:bold;">※ 유닛 이름만 필수이며, 나머지는 비워두셔도 됩니다.</p>
+        </div>
+
+        <div id="kt-db-phases-container"></div>
     </div>
 
     <div id="screen-list" class="screen">
         <div class="header">
-            <button class="btn btn-outline" onclick="navTo('screen-home')">◀ 메인</button>
+            <button class="btn btn-outline" onclick="navToHubOrHome()">◀ 뒤로</button>
             <h2 id="list-game-title">Game Title</h2>
             <div style="display:flex; gap:5px;">
-                <button class="btn btn-outline" style="padding:8px 10px; font-size:14px;" onclick="openImportModal()">⬇️ 불러오기</button>
-                <button class="btn" style="padding:8px 10px; font-size:14px;" onclick="navTo('screen-edit')">＋ 추가</button>
+                <button class="btn btn-outline" style="padding:8px 10px; font-size:14px;" onclick="openImportModal(currentGameKey)">⬇️ 불러오기</button>
+                <button class="btn" style="padding:8px 10px; font-size:14px;" onclick="initEditRouter()">＋ 추가</button>
             </div>
         </div>
-        <div id="faction-list-container">
-            </div>
+        <div id="faction-list-container"></div>
+    </div>
+
+    <div id="screen-kt-roster-edit" class="screen">
+        <div class="header">
+            <button class="btn btn-outline" onclick="navTo('screen-list')">취소</button>
+            <h2 id="kt-roster-edit-title">새 로스터 편성</h2>
+            <button class="btn" onclick="saveKtRoster()">저장</button>
+        </div>
+        
+        <label style="font-weight:bold;">로스터 이름 <span style="color:red">*</span></label>
+        <textarea id="ktRosterName" class="u-textarea" placeholder="로스터의 이름을 적어주세요 (예: 토너먼트용 A)" rows="1"></textarea>
+
+        <label style="font-weight:bold; display:block; margin-top:10px;">사용할 팩션 데이터 불러오기</label>
+        <select id="ktRosterFactionSelect" class="u-select" style="font-size:16px; padding:10px 0; margin-bottom:15px; border-color:var(--primary-color);" onchange="renderKtRosterPhases()">
+        </select>
+
+        <div id="kt-roster-phases-wrapper" style="display:none;">
+            <h3 style="margin-top:10px;">페이즈별 유닛 배치</h3>
+            <p style="font-size:12px; color:#7f8fa6; margin-top:5px; margin-bottom:15px;">유닛 체크 시 모든 무기가 기본적으로 선택됩니다. 가져가지 않을 무기는 이름을 펼쳐서 체크 해제하세요.</p>
+            <div id="kt-roster-phases-container"></div>
+        </div>
     </div>
 
     <div id="screen-edit" class="screen">
@@ -362,101 +255,46 @@
             <h2 id="edit-title">새 리스트 추가</h2>
             <button class="btn" onclick="saveFaction()">저장</button>
         </div>
-        
-        <label for="factionName" style="font-weight:bold;">팩션(팀) 이름 <span style="color:red">*</span></label>
+        <label style="font-weight:bold;">팩션(팀) 이름 <span style="color:red">*</span></label>
         <textarea id="factionName" class="u-textarea" placeholder="이름을 입력하세요" rows="2"></textarea>
-
-        <div id="killteam-rule-section" style="display:none;">
-            <label for="factionRule" style="font-weight:bold; display:block; margin-top:5px;">팩션 룰</label>
-            <textarea id="factionRule" class="u-textarea" placeholder="간단한 팩션 룰을 적어주세요 (엔터로 줄바꿈 가능)" rows="3"></textarea>
-        </div>
-
         <div style="margin-top: 20px;">
             <h3 id="phase-settings-title">페이즈별 유닛 및 능력 설정</h3>
-            <p style="font-size:12px; color:#e74c3c; margin-top:5px; font-weight:bold;">※ 유닛 이름만 필수이며, 나머지는 비워두셔도 됩니다.</p>
         </div>
-
-        <div id="phases-container">
-            </div>
+        <div id="phases-container"></div>
     </div>
+
 </div>
 
 <script>
     const gameConfig = {
         spearhead: {
             title: "Spearhead",
-            phases: ["히어로페이즈", "무브페이즈", "사격페이즈", "차지페이즈", "어택페이즈", "엔드페이즈"],
-            settingTitle: "페이즈별 유닛 및 능력 설정"
+            phases: ["히어로페이즈", "무브페이즈", "사격페이즈", "차지페이즈", "어택페이즈", "엔드페이즈"]
         },
         killteam: {
-            title: "Kill Team",
-            phases: ["Scouting Phase", "Initiative Phase", "Strategy Phase", "Firefight Phase"],
-            settingTitle: "터닝페이즈 별 유닛 장비 및 능력 설정"
+            title: "Kill Team (로스터)",
+            phases: ["Scouting Phase", "Initiative Phase", "Strategy Phase", "Firefight Phase"]
         }
     };
 
-    let currentData = {};
-    let savedFactions = [];
-    let editingIndex = -1; 
-    let openFactions = new Set(); 
-    
     let currentGameKey = ''; 
-    let currentPhases = []; 
+    let savedFactions = []; 
+    let savedKtDbFactions = []; 
+    let openFactions = new Set(); 
     let tempImages = {}; 
 
-    // --- 드래그 앤 드롭 함수 ---
+    // 상태 변수
+    let currentData = {};
+    let editingIndex = -1; 
+    let currentPhases = [];
+
+    let currentKtDbData = { id:'', name: '', rule: '', phases: {} };
+    let editingKtDbIndex = -1;
     let draggedItem = null;
 
-    function dragStart(e, phase, index) {
-        draggedItem = { phase: phase, index: index };
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', index);
-        setTimeout(() => { e.target.style.opacity = '0.4'; }, 0);
-    }
+    let currentKtRoster = { id:'', name: '', factionDbId: '', rule: '', phases: {} };
+    let editingKtRosterIndex = -1;
 
-    function dragOver(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    function drop(e, targetPhase, targetIndex) {
-        e.preventDefault();
-        e.target.style.opacity = '1';
-        
-        if (draggedItem && draggedItem.phase === targetPhase && draggedItem.index !== targetIndex) {
-            const arr = currentData[targetPhase];
-            const itemToMove = arr.splice(draggedItem.index, 1)[0];
-            arr.splice(targetIndex, 0, itemToMove);
-            renderUnitsInEdit(targetPhase);
-        }
-        draggedItem = null;
-    }
-
-    function dragEnd(e) {
-        e.target.style.opacity = '1';
-        draggedItem = null;
-    }
-
-    // --- 화살표 순서 변경 함수 ---
-    function moveUnitUp(phase, index) {
-        if (index > 0) {
-            const arr = currentData[phase];
-            const temp = arr[index];
-            arr[index] = arr[index - 1];
-            arr[index - 1] = temp;
-            renderUnitsInEdit(phase);
-        }
-    }
-
-    function moveUnitDown(phase, index) {
-        const arr = currentData[phase];
-        if (index < arr.length - 1) {
-            const temp = arr[index];
-            arr[index] = arr[index + 1];
-            arr[index + 1] = temp;
-            renderUnitsInEdit(phase);
-        }
-    }
 
     function makeNumberOptions(selectedValue) {
         let opts = `<option value="" ${selectedValue === '' ? 'selected' : ''}>-</option>`;
@@ -465,82 +303,115 @@
         }
         return opts;
     }
-
-    function addApRow(phase, value = '') {
-        const container = document.getElementById(`ap-container-${phase}`);
-        const div = document.createElement('div');
-        div.style.position = 'relative';
-        div.innerHTML = `
-            <textarea class="u-textarea ap-input" placeholder="ap 능력 (선택)" rows="2" style="margin-bottom:5px; padding-right:30px;">${value}</textarea>
-            <button class="btn-small" style="position:absolute; right:5px; top:5px; background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
-        `;
-        container.appendChild(div);
+    
+    function generateId() {
+        return Date.now().toString() + Math.random().toString(36).substr(2, 5);
     }
 
-    function addWeaponRow(phase, wep = {type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}) {
-        const container = document.getElementById(`weapon-container-${phase}`);
-        const div = document.createElement('div');
-        div.className = 'weapon-input-row';
-        div.style.display = 'grid';
-        div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1.8fr 2fr 30px';
-        div.style.gap = '4px';
-        div.style.marginBottom = '4px';
-        div.style.alignItems = 'center';
-        
-        let d1 = '', d2 = '';
-        if(wep.dmg && String(wep.dmg).includes('/')) {
-            [d1, d2] = wep.dmg.split('/');
-        } else if (wep.dmg) {
-            d1 = wep.dmg;
+    function toggleDetail(detailId, iconId) {
+        const detailEl = document.getElementById(detailId);
+        const iconEl = document.getElementById(iconId);
+        if(detailEl.classList.contains('show')) {
+            detailEl.classList.remove('show');
+            if(iconEl) iconEl.innerText = '▼ 펼치기';
+        } else {
+            detailEl.classList.add('show');
+            if(iconEl) iconEl.innerText = '▲ 접기';
         }
-
-        div.innerHTML = `
-            <select class="u-select wep-type" style="padding:4px 0; font-size:16px;">
-                <option value="🔫" ${wep.type === '🔫' ? 'selected' : ''}>🔫</option>
-                <option value="🗡️" ${wep.type === '🗡️' ? 'selected' : ''}>🗡️</option>
-            </select>
-            <input type="text" class="u-input wep-name" placeholder="무기명" value="${wep.name}">
-            
-            <select class="u-select wep-atk">${makeNumberOptions(wep.atk)}</select>
-            <select class="u-select wep-hit">${makeNumberOptions(wep.hit)}</select>
-            
-            <div style="display:flex; align-items:center; gap: 2px;">
-                <select class="u-select wep-dmg1">${makeNumberOptions(d1)}</select>
-                <span style="color:#7f8fa6;">/</span>
-                <select class="u-select wep-dmg2">${makeNumberOptions(d2)}</select>
-            </div>
-
-            <input type="text" class="u-input wep-wr" placeholder="규칙" value="${wep.wr}">
-            <button class="btn-small" style="background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
-        `;
-        container.appendChild(div);
     }
 
     function navTo(screenId) {
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
-
-        if (screenId === 'screen-edit') {
-            editingIndex = -1; 
-            document.getElementById('edit-title').innerText = "새 리스트 추가";
-            initEditScreen();
-        } else if (screenId === 'screen-list') {
-            renderFactionList();
-        }
     }
 
     function navToGame(gameKey) {
         currentGameKey = gameKey;
-        const config = gameConfig[gameKey];
-        
-        currentPhases = config.phases;
         savedFactions = JSON.parse(localStorage.getItem(currentGameKey + '_factions')) || [];
         openFactions.clear(); 
         
-        document.getElementById('list-game-title').innerText = config.title;
-        document.getElementById('phase-settings-title').innerText = config.settingTitle;
-        
+        document.getElementById('list-game-title').innerText = gameConfig[gameKey].title;
         navTo('screen-list');
+        renderFactionList();
+    }
+
+    function navToHubOrHome() {
+        if(currentGameKey === 'killteam') navTo('screen-kt-hub');
+        else navTo('screen-home');
+    }
+
+    function openKtDbList() {
+        currentGameKey = 'killteam_db';
+        savedKtDbFactions = JSON.parse(localStorage.getItem('killteam_db_factions')) || [];
+        
+        let needsSave = false;
+        savedKtDbFactions.forEach(fac => {
+            if (!fac.id) { fac.id = generateId(); needsSave = true; }
+            if (!fac.phases) {
+                fac.phases = {
+                    "Scouting Phase": [],
+                    "Initiative Phase": [],
+                    "Strategy Phase": [],
+                    "Firefight Phase": fac.units || []
+                };
+                delete fac.units;
+                needsSave = true;
+            }
+        });
+        if(needsSave) localStorage.setItem('killteam_db_factions', JSON.stringify(savedKtDbFactions));
+
+        openFactions.clear();
+        navTo('screen-kt-db-list');
+        renderKtDbList();
+    }
+
+    function openKtRosterList() {
+        currentGameKey = 'killteam';
+        savedFactions = JSON.parse(localStorage.getItem('killteam_factions')) || [];
+        openFactions.clear();
+        document.getElementById('list-game-title').innerText = gameConfig.killteam.title;
+        navTo('screen-list');
+        renderFactionList();
+    }
+
+    function initEditRouter() {
+        if(currentGameKey === 'killteam') {
+            initKtRosterEditScreen();
+        } else {
+            editingIndex = -1;
+            document.getElementById('edit-title').innerText = "새 리스트 추가";
+            initEditScreen();
+            navTo('screen-edit');
+        }
+    }
+
+    function handleImageSelect(event, targetKey) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_SIZE = 150; 
+                let width = img.width; let height = img.height;
+                if (width > height) { if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } } 
+                else { if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; } }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                tempImages[targetKey] = compressedBase64;
+                const preview = document.getElementById(`preview-${targetKey}`);
+                const previewText = document.getElementById(`preview-text-${targetKey}`);
+                preview.src = compressedBase64;
+                preview.style.display = 'block';
+                previewText.style.display = 'inline-block';
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
     }
 
     function openImageModal(imgSrc) {
@@ -556,119 +427,104 @@
         document.getElementById('modalImage').src = '';
     }
 
-    function exportSingleFaction(index) {
-        const factionData = savedFactions[index];
-        const exportObj = { game: currentGameKey, data: factionData };
-        const code = btoa(encodeURIComponent(JSON.stringify(exportObj)));
-        
-        document.getElementById('codeModalTitle').innerText = '🚀 리스트 공유(코드)';
-        document.getElementById('codeModalDesc').innerText = '아래 코드를 복사하여 친구에게 주거나 다른 기기에서 불러오세요.';
-        
-        const textArea = document.getElementById('codeModalText');
-        textArea.value = code;
-        textArea.readOnly = true;
-        
-        const actionBtn = document.getElementById('codeModalActionBtn');
-        actionBtn.innerText = '📋 복사하기';
-        actionBtn.style.backgroundColor = '#27ae60';
-        actionBtn.onclick = function() {
-            textArea.select();
-            document.execCommand('copy');
-            alert('코드가 클립보드에 복사되었습니다!');
-            closeCodeModal();
-        };
-        
-        document.getElementById('codeModal').style.display = 'flex';
+    function togglePhase(element) { element.classList.toggle('active'); }
+    
+    function toggleFactionContent(index) {
+        const content = document.getElementById(`faction-content-${index}`);
+        const icon = document.getElementById(`faction-icon-${index}`);
+        content.classList.toggle('active');
+        if (content.classList.contains('active')) { icon.innerText = '▲'; openFactions.add(index); } 
+        else { icon.innerText = '▼'; openFactions.delete(index); }
     }
 
-    function openImportModal() {
-        document.getElementById('codeModalTitle').innerText = '⬇️ 리스트 불러오기';
-        document.getElementById('codeModalDesc').innerText = '복사해온 리스트 코드를 아래에 붙여넣어 추가하세요. (기존 리스트는 지워지지 않습니다!)';
-        
-        const textArea = document.getElementById('codeModalText');
-        textArea.value = '';
-        textArea.readOnly = false;
-        textArea.placeholder = '여기에 코드를 붙여넣으세요...';
-        
-        const actionBtn = document.getElementById('codeModalActionBtn');
-        actionBtn.innerText = '추가하기';
-        actionBtn.style.backgroundColor = 'var(--accent-color)';
-        actionBtn.onclick = function() {
-            const code = textArea.value.trim();
-            if(!code) { alert('코드를 입력하세요.'); return; }
-            try {
-                const jsonStr = decodeURIComponent(atob(code));
-                const importObj = JSON.parse(jsonStr);
-                
-                if(importObj.game !== currentGameKey) {
-                    alert(`⚠️ 올바르지 않은 코드입니다. 이 코드는 [${importObj.game}] 게임용 리스트입니다.`);
-                    return;
-                }
-                
-                importObj.data.id = Date.now();
-                savedFactions.push(importObj.data);
-                localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
-                
-                renderFactionList();
-                closeCodeModal();
-                alert(`'${importObj.data.name}' 리스트가 성공적으로 추가되었습니다!`);
-            } catch(e) {
-                alert('유효하지 않은 코드입니다. 코드가 전부 올바르게 복사되었는지 확인해주세요.');
-            }
-        };
-        
-        document.getElementById('codeModal').style.display = 'flex';
+    function toggleKtDbFactionContent(index) {
+        const content = document.getElementById(`kt-db-faction-content-${index}`);
+        const icon = document.getElementById(`kt-db-faction-icon-${index}`);
+        content.classList.toggle('active');
+        if (content.classList.contains('active')) { icon.innerText = '▲'; openFactions.add(index); } 
+        else { icon.innerText = '▼'; openFactions.delete(index); }
     }
 
-    function closeCodeModal() {
-        document.getElementById('codeModal').style.display = 'none';
+
+    // =========================================================================
+    // [1단계] 킬팀 팩션 DB 시스템
+    // =========================================================================
+    
+    function addKtDbApRow(phase, value = '') {
+        const container = document.getElementById(`kt-db-ap-input-container-${phase}`);
+        const div = document.createElement('div');
+        div.style.position = 'relative';
+        div.innerHTML = `
+            <textarea class="u-textarea ap-input" placeholder="ap 능력 (선택)" rows="2" style="margin-bottom:5px; padding-right:30px;">${value}</textarea>
+            <button class="btn-small" style="position:absolute; right:5px; top:5px; background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
     }
 
-    function editFaction(index) {
-        editingIndex = index;
-        const faction = savedFactions[index];
+    function addKtDbWeaponRow(phase, wep = {type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}) {
+        const container = document.getElementById(`kt-db-weapon-input-container-${phase}`);
+        const div = document.createElement('div');
+        div.className = 'weapon-input-row';
+        div.style.display = 'grid';
+        div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1.8fr 2fr 30px';
+        div.style.gap = '4px'; div.style.marginBottom = '4px'; div.style.alignItems = 'center';
         
-        currentData = JSON.parse(JSON.stringify(faction.phases));
-        
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById('screen-edit').classList.add('active');
-        
-        document.getElementById('edit-title').innerText = "리스트 수정";
-        // 기존 데이터에 숨어있는 공백을 완벽 제거(trim)
-        document.getElementById('factionName').value = faction.name ? faction.name.trim() : '';
-        document.getElementById('factionRule').value = faction.rule ? faction.rule.trim() : '';
-        
-        if(currentGameKey === 'killteam') {
-            document.getElementById('killteam-rule-section').style.display = 'block';
-        } else {
-            document.getElementById('killteam-rule-section').style.display = 'none';
-        }
-        
-        tempImages = {}; 
-        renderPhases();
+        let d1 = '', d2 = '';
+        if(wep.dmg && String(wep.dmg).includes('/')) { [d1, d2] = wep.dmg.split('/'); } 
+        else if (wep.dmg) { d1 = wep.dmg; }
+
+        div.innerHTML = `
+            <select class="u-select wep-type" style="padding:4px 0; font-size:16px;">
+                <option value="🔫" ${wep.type === '🔫' ? 'selected' : ''}>🔫</option>
+                <option value="🗡️" ${wep.type === '🗡️' ? 'selected' : ''}>🗡️</option>
+            </select>
+            <input type="text" class="u-input wep-name" placeholder="무기명" value="${wep.name}">
+            <select class="u-select wep-atk">${makeNumberOptions(wep.atk)}</select>
+            <select class="u-select wep-hit">${makeNumberOptions(wep.hit)}</select>
+            <div style="display:flex; align-items:center; gap: 2px;">
+                <select class="u-select wep-dmg1">${makeNumberOptions(d1)}</select>
+                <span style="color:#7f8fa6;">/</span>
+                <select class="u-select wep-dmg2">${makeNumberOptions(d2)}</select>
+            </div>
+            <input type="text" class="u-input wep-wr" placeholder="규칙" value="${wep.wr}">
+            <button class="btn-small" style="background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
+        `;
+        container.appendChild(div);
     }
 
-    function initEditScreen() {
-        document.getElementById('factionName').value = '';
-        document.getElementById('factionRule').value = '';
+    function initKtDbEditScreen() {
+        editingKtDbIndex = -1;
+        currentKtDbData = { id: generateId(), name: '', rule: '', phases: {} };
+        gameConfig.killteam.phases.forEach(p => currentKtDbData.phases[p] = []);
         
-        if(currentGameKey === 'killteam') {
-            document.getElementById('killteam-rule-section').style.display = 'block';
-        } else {
-            document.getElementById('killteam-rule-section').style.display = 'none';
-        }
-
-        currentData = {};
-        tempImages = {}; 
-        currentPhases.forEach(p => currentData[p] = []); 
-        renderPhases();
+        document.getElementById('kt-db-edit-title').innerText = "새 팩션 DB 등록";
+        document.getElementById('ktDbFactionName').value = '';
+        document.getElementById('ktDbFactionRule').value = '';
+        
+        tempImages = {};
+        renderKtDbPhases();
+        navTo('screen-kt-db-edit');
     }
 
-    function renderPhases() {
-        const container = document.getElementById('phases-container');
+    function editKtDbFaction(index) {
+        editingKtDbIndex = index;
+        const faction = savedKtDbFactions[index];
+        currentKtDbData = JSON.parse(JSON.stringify(faction));
+        
+        document.getElementById('kt-db-edit-title').innerText = "팩션 DB 수정";
+        document.getElementById('ktDbFactionName').value = currentKtDbData.name ? currentKtDbData.name.trim() : '';
+        document.getElementById('ktDbFactionRule').value = currentKtDbData.rule ? currentKtDbData.rule.trim() : '';
+        
+        tempImages = {};
+        renderKtDbPhases();
+        navTo('screen-kt-db-edit');
+    }
+
+    function renderKtDbPhases() {
+        const container = document.getElementById('kt-db-phases-container');
         container.innerHTML = '';
 
-        currentPhases.forEach(phase => {
+        gameConfig.killteam.phases.forEach(phase => {
             const phaseWrapper = document.createElement('div');
             
             const header = document.createElement('div');
@@ -678,43 +534,40 @@
 
             const content = document.createElement('div');
             content.className = 'phase-content';
-            content.id = `content-${phase}`;
 
             const unitList = document.createElement('div');
-            unitList.id = `list-${phase}`;
+            unitList.id = `kt-db-list-${phase.replace(/\s/g, '')}`; 
             
             const inputArea = document.createElement('div');
-            inputArea.style.marginTop = '10px';
-            inputArea.style.paddingTop = '10px';
-            inputArea.style.borderTop = '1px dashed #ccc';
+            inputArea.style.marginTop = '10px'; inputArea.style.paddingTop = '10px'; inputArea.style.borderTop = '1px dashed #ccc';
             
+            const safePhaseId = phase.replace(/\s/g, ''); 
+
             let baseInputHTML = `
-                <textarea id="unitName-${phase}" class="u-textarea" placeholder="유닛 이름 (필수)" rows="1" style="margin-bottom:5px; border-color:var(--accent-color);"></textarea>
-                <textarea id="unitAbility-${phase}" class="u-textarea" placeholder="사용할 능력 (선택)" rows="2" style="margin-bottom:5px;"></textarea>
+                <textarea id="ktDbUnitName-${safePhaseId}" class="u-textarea" placeholder="유닛 이름 (필수)" rows="1" style="margin-bottom:5px; border-color:var(--accent-color);"></textarea>
+                <textarea id="ktDbUnitAbility-${safePhaseId}" class="u-textarea" placeholder="사용할 능력 (선택)" rows="2" style="margin-bottom:5px;"></textarea>
             `;
 
             let equipmentInputHTML = '';
-            if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
+            if(phase === 'Firefight Phase') {
                 equipmentInputHTML = `
                     <div style="background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                             <strong style="font-size:13px; color:var(--primary-color);">[AP 능력 (선택)]</strong>
-                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addApRow('${phase}')">＋ 추가</button>
+                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addKtDbApRow('${safePhaseId}')">＋ 추가</button>
                         </div>
-                        <div id="ap-container-${phase}">
-                        </div>
+                        <div id="kt-db-ap-input-container-${safePhaseId}"></div>
                     </div>
                     
                     <div style="background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                             <strong style="font-size:13px; color:var(--primary-color);">[무기 정보 (선택)]</strong>
-                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addWeaponRow('${phase}')">＋ 추가</button>
+                            <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addKtDbWeaponRow('${safePhaseId}')">＋ 추가</button>
                         </div>
                         <div style="display: grid; grid-template-columns: 45px 3fr 1fr 1fr 1.8fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
                             <div>Type</div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div><div></div>
                         </div>
-                        <div id="weapon-container-${phase}">
-                        </div>
+                        <div id="kt-db-weapon-input-container-${safePhaseId}"></div>
                     </div>
                 `;
             }
@@ -726,134 +579,65 @@
                 <div style="display:flex; align-items:center; margin-bottom:15px; gap: 10px;">
                     <label class="file-upload-label">
                         📷 앨범/사진 첨부 (선택)
-                        <input type="file" id="unitImage-${phase}" accept="image/*" style="display:none;" onchange="handleImageSelect(event, '${phase}')">
+                        <input type="file" id="ktDbUnitImage-${safePhaseId}" accept="image/*" style="display:none;" onchange="handleImageSelect(event, 'ktDb-${safePhaseId}')">
                     </label>
-                    <img id="preview-${phase}" src="" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:5px; border:1px solid #ccc;">
-                    <span id="preview-text-${phase}" style="font-size:12px; color:#7f8fa6; display:none;">준비됨!</span>
+                    <img id="preview-ktDb-${safePhaseId}" src="" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:5px; border:1px solid #ccc;">
+                    <span id="preview-text-ktDb-${safePhaseId}" style="font-size:12px; color:#7f8fa6; display:none;">준비됨!</span>
                 </div>
 
-                <button class="btn btn-small" onclick="addUnit('${phase}')" style="width:100%">+ 이 페이즈에 추가</button>
+                <button class="btn btn-small" onclick="addKtDbUnit('${phase}')" style="width:100%; font-size:16px; padding:12px 0;">+ 이 페이즈 리스트에 추가</button>
             `;
 
             content.appendChild(unitList);
             content.appendChild(inputArea);
-            
             phaseWrapper.appendChild(header);
             phaseWrapper.appendChild(content);
             container.appendChild(phaseWrapper);
 
-            if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
-                addApRow(phase);
-                addWeaponRow(phase);
+            if(phase === 'Firefight Phase') {
+                addKtDbApRow(safePhaseId);
+                addKtDbWeaponRow(safePhaseId);
             }
 
-            renderUnitsInEdit(phase);
+            renderKtDbUnitsInEdit(phase);
         });
     }
 
-    function togglePhase(element) {
-        element.classList.toggle('active');
-    }
-
-    function toggleFactionContent(index) {
-        const content = document.getElementById(`faction-content-${index}`);
-        const icon = document.getElementById(`faction-icon-${index}`);
+    function addKtDbUnit(phase) {
+        const safePhaseId = phase.replace(/\s/g, '');
+        const nameInput = document.getElementById(`ktDbUnitName-${safePhaseId}`);
+        const abilityInput = document.getElementById(`ktDbUnitAbility-${safePhaseId}`);
         
-        content.classList.toggle('active');
-        
-        if (content.classList.contains('active')) {
-            icon.innerText = '▲';
-            openFactions.add(index);
-        } else {
-            icon.innerText = '▼';
-            openFactions.delete(index);
-        }
-    }
-
-    function handleImageSelect(event, phase) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const MAX_SIZE = 150; 
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
-                } else {
-                    if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
-                }
-                
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                tempImages[phase] = compressedBase64;
-
-                const preview = document.getElementById(`preview-${phase}`);
-                const previewText = document.getElementById(`preview-text-${phase}`);
-                preview.src = compressedBase64;
-                preview.style.display = 'block';
-                previewText.style.display = 'inline-block';
-            }
-            img.src = e.target.result;
-        }
-        reader.readAsDataURL(file);
-    }
-
-    function addUnit(phase) {
-        const nameInput = document.getElementById(`unitName-${phase}`);
-        const abilityInput = document.getElementById(`unitAbility-${phase}`);
-        
-        if (!nameInput.value.trim()) {
-            alert('유닛 이름은 필수입니다.');
-            nameInput.focus();
-            return;
-        }
-
-        if (!currentData[phase]) currentData[phase] = [];
+        const nameVal = nameInput.value.trim();
+        if (!nameVal) { alert('유닛 이름은 필수입니다.'); nameInput.focus(); return; }
 
         let unitData = {
-            name: nameInput.value.trim(),
+            id: generateId(),
+            name: nameVal,
             ability: abilityInput.value.trim(),
-            image: tempImages[phase] || null, 
-            checked: false
+            image: tempImages[`ktDb-${safePhaseId}`] || null,
+            apAbilities: [],
+            weapons: []
         };
 
-        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
-            unitData.apAbilities = [];
-            const apContainer = document.getElementById(`ap-container-${phase}`);
+        if(phase === 'Firefight Phase') {
+            const apContainer = document.getElementById(`kt-db-ap-input-container-${safePhaseId}`);
             if(apContainer) {
-                const apInputs = apContainer.querySelectorAll('.ap-input');
-                apInputs.forEach(input => {
+                apContainer.querySelectorAll('.ap-input').forEach(input => {
                     if(input.value.trim()) unitData.apAbilities.push(input.value.trim());
                 });
             }
 
-            unitData.weapons = [];
-            const weaponContainer = document.getElementById(`weapon-container-${phase}`);
+            const weaponContainer = document.getElementById(`kt-db-weapon-input-container-${safePhaseId}`);
             if(weaponContainer) {
-                const weaponRows = weaponContainer.querySelectorAll('.weapon-input-row');
-                weaponRows.forEach(row => {
+                weaponContainer.querySelectorAll('.weapon-input-row').forEach(row => {
                     const type = row.querySelector('.wep-type').value;
                     const name = row.querySelector('.wep-name').value.trim();
                     const atk = row.querySelector('.wep-atk').value;
                     const hit = row.querySelector('.wep-hit').value;
-                    
                     const d1 = row.querySelector('.wep-dmg1').value;
                     const d2 = row.querySelector('.wep-dmg2').value;
-                    let dmg = '';
-                    if (d1 !== '' || d2 !== '') {
-                        dmg = `${d1 || '0'}/${d2 || '0'}`;
-                    }
-
+                    let dmg = (d1 !== '' || d2 !== '') ? `${d1 || '0'}/${d2 || '0'}` : '';
                     const wr = row.querySelector('.wep-wr').value.trim();
                     
                     if(name || atk !== '' || hit !== '' || dmg || wr) {
@@ -863,189 +647,521 @@
             }
         }
 
-        currentData[phase].push(unitData);
+        currentKtDbData.phases[phase].push(unitData);
 
         nameInput.value = '';
         abilityInput.value = '';
+        tempImages[`ktDb-${safePhaseId}`] = null;
+        document.getElementById(`ktDbUnitImage-${safePhaseId}`).value = '';
+        document.getElementById(`preview-ktDb-${safePhaseId}`).style.display = 'none';
+        document.getElementById(`preview-text-ktDb-${safePhaseId}`).style.display = 'none';
         
-        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
-            document.getElementById(`ap-container-${phase}`).innerHTML = '';
-            document.getElementById(`weapon-container-${phase}`).innerHTML = '';
-            addApRow(phase);
-            addWeaponRow(phase);
+        if(phase === 'Firefight Phase') {
+            document.getElementById(`kt-db-ap-input-container-${safePhaseId}`).innerHTML = '';
+            document.getElementById(`kt-db-weapon-input-container-${safePhaseId}`).innerHTML = '';
+            addKtDbApRow(safePhaseId);
+            addKtDbWeaponRow(safePhaseId);
         }
-        
-        tempImages[phase] = null;
-        
-        const fileInput = document.getElementById(`unitImage-${phase}`);
-        if(fileInput) fileInput.value = '';
-        document.getElementById(`preview-${phase}`).style.display = 'none';
-        document.getElementById(`preview-text-${phase}`).style.display = 'none';
-        
-        renderUnitsInEdit(phase);
+
+        renderKtDbUnitsInEdit(phase);
     }
 
-    function editUnitItem(phase, index) {
-        const item = currentData[phase][index];
+    function editKtDbUnit(phase, index) {
+        const safePhaseId = phase.replace(/\s/g, '');
+        const item = currentKtDbData.phases[phase][index];
         
-        // 옛날 데이터 공백 제거
-        document.getElementById(`unitName-${phase}`).value = item.name ? item.name.trim() : '';
-        document.getElementById(`unitAbility-${phase}`).value = item.ability ? item.ability.trim() : '';
+        document.getElementById(`ktDbUnitName-${safePhaseId}`).value = item.name || '';
+        document.getElementById(`ktDbUnitAbility-${safePhaseId}`).value = item.ability || '';
         
-        if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
-            const apContainer = document.getElementById(`ap-container-${phase}`);
-            if(apContainer) {
-                apContainer.innerHTML = '';
-                let apList = item.apAbilities || [];
-                if(item.equipment) apList.push(item.equipment); 
-                if(apList.length === 0) apList = [''];
-                apList.forEach(ap => addApRow(phase, ap.trim()));
-            }
+        if(phase === 'Firefight Phase') {
+            const apContainer = document.getElementById(`kt-db-ap-input-container-${safePhaseId}`);
+            apContainer.innerHTML = '';
+            let apList = item.apAbilities || [];
+            if(apList.length === 0) apList = [''];
+            apList.forEach(ap => addKtDbApRow(safePhaseId, ap.trim()));
 
-            const wepContainer = document.getElementById(`weapon-container-${phase}`);
-            if(wepContainer) {
-                wepContainer.innerHTML = '';
-                let wepList = item.weapons || [];
-                if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
-                    wepList.push({type: item.wepType||'🔫', name: item.wepName||'', atk: item.wepAtk||'', hit: item.wepHit||'', dmg: item.wepDmg||'', wr: item.wepWr||''});
-                }
-                if(wepList.length === 0) wepList = [{type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}];
-                wepList.forEach(w => addWeaponRow(phase, w));
-            }
+            const wepContainer = document.getElementById(`kt-db-weapon-input-container-${safePhaseId}`);
+            wepContainer.innerHTML = '';
+            let wepList = item.weapons || [];
+            if(wepList.length === 0) wepList = [{type:'🔫', name:'', atk:'', hit:'', dmg:'', wr:''}];
+            wepList.forEach(w => addKtDbWeaponRow(safePhaseId, w));
         }
 
         if(item.image) {
-            tempImages[phase] = item.image;
-            document.getElementById(`preview-${phase}`).src = item.image;
-            document.getElementById(`preview-${phase}`).style.display = 'block';
-            document.getElementById(`preview-text-${phase}`).style.display = 'inline-block';
+            tempImages[`ktDb-${safePhaseId}`] = item.image;
+            document.getElementById(`preview-ktDb-${safePhaseId}`).src = item.image;
+            document.getElementById(`preview-ktDb-${safePhaseId}`).style.display = 'block';
+            document.getElementById(`preview-text-ktDb-${safePhaseId}`).style.display = 'inline-block';
         } else {
-            tempImages[phase] = null;
-            document.getElementById(`preview-${phase}`).style.display = 'none';
-            document.getElementById(`preview-text-${phase}`).style.display = 'none';
+            tempImages[`ktDb-${safePhaseId}`] = null;
+            document.getElementById(`preview-ktDb-${safePhaseId}`).style.display = 'none';
+            document.getElementById(`preview-text-ktDb-${safePhaseId}`).style.display = 'none';
         }
 
-        currentData[phase].splice(index, 1);
-        renderUnitsInEdit(phase);
-        
-        document.getElementById(`unitName-${phase}`).focus();
+        currentKtDbData.phases[phase].splice(index, 1);
+        renderKtDbUnitsInEdit(phase);
+        document.getElementById(`ktDbUnitName-${safePhaseId}`).focus();
     }
 
-    function renderUnitsInEdit(phase) {
-        const listContainer = document.getElementById(`list-${phase}`);
-        listContainer.innerHTML = '';
+    function removeKtDbUnit(phase, index) {
+        currentKtDbData.phases[phase].splice(index, 1);
+        renderKtDbUnitsInEdit(phase);
+    }
+
+    function ktDbDragStart(e, phase, index) { draggedItem = {phase: phase, index: index}; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); }
+    function ktDbDrop(e, targetPhase, targetIndex) {
+        e.preventDefault(); e.target.style.opacity = '1';
+        if (draggedItem !== null && draggedItem.phase === targetPhase && draggedItem.index !== targetIndex) {
+            const arr = currentKtDbData.phases[targetPhase];
+            const itemToMove = arr.splice(draggedItem.index, 1)[0];
+            arr.splice(targetIndex, 0, itemToMove);
+            renderKtDbUnitsInEdit(targetPhase);
+        }
+        draggedItem = null;
+    }
+    function ktDbMoveUp(phase, index) {
+        if (index > 0) {
+            const arr = currentKtDbData.phases[phase];
+            const temp = arr[index]; arr[index] = arr[index - 1]; arr[index - 1] = temp;
+            renderKtDbUnitsInEdit(phase);
+        }
+    }
+    function ktDbMoveDown(phase, index) {
+        const arr = currentKtDbData.phases[phase];
+        if (index < arr.length - 1) {
+            const temp = arr[index]; arr[index] = arr[index + 1]; arr[index + 1] = temp;
+            renderKtDbUnitsInEdit(phase);
+        }
+    }
+
+    function renderKtDbUnitsInEdit(phase) {
+        const safePhaseId = phase.replace(/\s/g, '');
+        const container = document.getElementById(`kt-db-list-${safePhaseId}`);
+        container.innerHTML = '';
         
-        if(currentData[phase]) {
-            currentData[phase].forEach((item, index) => {
-                const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
-                let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
-                let equipmentHTML = '';
-                let weaponHTML = '';
+        if(!currentKtDbData.phases[phase] || currentKtDbData.phases[phase].length === 0) {
+            container.innerHTML = '<p style="color:#7f8fa6; text-align:center; font-size:14px;">등록된 유닛이 없습니다.</p>';
+            return;
+        }
 
-                if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
-                    let apArray = item.apAbilities || [];
-                    if (item.equipment) apArray.push(item.equipment);
-                    
-                    if (apArray.length > 0) {
-                        equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
-                    }
-                    
-                    let wepArray = item.weapons || [];
-                    if(item.wepName || item.wepAtk || item.wepHit || item.wepDmg || item.wepWr) {
-                        wepArray.push({type: item.wepType||'🔫', name: item.wepName, atk: item.wepAtk, hit: item.wepHit, dmg: item.wepDmg, wr: item.wepWr});
-                    }
+        currentKtDbData.phases[phase].forEach((item, index) => {
+            const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
+            let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
+            
+            let equipmentHTML = '';
+            let weaponHTML = '';
 
-                    if (wepArray.length > 0) {
-                        weaponHTML = `
-                            <div class="weapon-table">
-                                <div class="weapon-table-header">
-                                    <div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
-                                </div>
-                                ${wepArray.map(w => `
-                                <div class="weapon-table-row">
-                                    <div style="font-size:16px;">${w.type || '🔫'}</div>
-                                    <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name ? w.name.trim() : '-'}</div>
-                                    <div>${w.atk !== '' ? w.atk : '-'}</div>
-                                    <div>${w.hit !== '' ? w.hit : '-'}</div>
-                                    <div>${w.dmg || '-'}</div>
-                                    <div style="font-size:11px;">${w.wr ? w.wr.trim() : '-'}</div>
-                                </div>
-                                `).join('')}
-                            </div>
-                        `;
-                    }
+            if(phase === 'Firefight Phase') {
+                let apArray = item.apAbilities || [];
+                if (apArray.length > 0) {
+                    equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                 }
-
-                listContainer.innerHTML += `
-                    <div class="unit-item" draggable="true" 
-                         ondragstart="dragStart(event, '${phase}', ${index})" 
-                         ondragover="dragOver(event)" 
-                         ondrop="drop(event, '${phase}', ${index})" 
-                         ondragend="dragEnd(event)">
-                         
-                        <div style="display:flex; align-items:flex-start; width:100%;">
-                            <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
-                            
-                            ${imgTag}
-                            
-                            <div style="flex-grow:1; padding-top: 4px;">
-                                <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
+                
+                let wepArray = item.weapons || [];
+                if (wepArray.length > 0) {
+                    weaponHTML = `
+                        <div class="weapon-table">
+                            <div class="weapon-table-header" style="grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;">
+                                <div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
                             </div>
-                            
-                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
-                                <div style="display:flex; gap:2px; width: 100%;">
-                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitUp('${phase}', ${index})">▲</button>
-                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitDown('${phase}', ${index})">▼</button>
-                                </div>
-                                <div style="display:flex; gap:2px; width: 100%;">
-                                    <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editUnitItem('${phase}', ${index})">수정</button>
-                                    <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeUnit('${phase}', ${index})">삭제</button>
-                                </div>
+                            ${wepArray.map(w => `
+                            <div class="weapon-table-row" style="grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;">
+                                <div style="font-size:16px;">${w.type || '🔫'}</div>
+                                <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name ? w.name.trim() : '-'}</div>
+                                <div>${w.atk !== '' ? w.atk : '-'}</div>
+                                <div>${w.hit !== '' ? w.hit : '-'}</div>
+                                <div>${w.dmg || '-'}</div>
+                                <div style="font-size:11px;">${w.wr ? w.wr.trim() : '-'}</div>
                             </div>
+                            `).join('')}
                         </div>
+                    `;
+                }
+            }
 
-                        <div style="margin-top: 12px; width: 100%;">
-                            ${abilityHTML}
-                            ${equipmentHTML}
-                            ${weaponHTML}
+            container.innerHTML += `
+                <div class="unit-item" draggable="true" 
+                     ondragstart="ktDbDragStart(event, '${phase}', ${index})" ondragover="dragOver(event)" 
+                     ondrop="ktDbDrop(event, '${phase}', ${index})" ondragend="dragEnd(event)">
+                     
+                    <div style="display:flex; align-items:flex-start; width:100%;">
+                        <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
+                        ${imgTag}
+                        <div style="flex-grow:1; padding-top: 4px;">
+                            <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
+                            <div style="display:flex; gap:2px; width: 100%;">
+                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="ktDbMoveUp('${phase}', ${index})">▲</button>
+                                <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="ktDbMoveDown('${phase}', ${index})">▼</button>
+                            </div>
+                            <div style="display:flex; gap:2px; width: 100%;">
+                                <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editKtDbUnit('${phase}', ${index})">수정</button>
+                                <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeKtDbUnit('${phase}', ${index})">삭제</button>
+                            </div>
                         </div>
                     </div>
-                `;
+                    <div style="margin-top: 12px; width: 100%;">
+                        ${abilityHTML} ${equipmentHTML} ${weaponHTML}
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function saveKtDbFaction() {
+        const name = document.getElementById('ktDbFactionName').value.trim();
+        if(!name) { alert('팩션 이름을 입력해주세요.'); return; }
+        
+        currentKtDbData.name = name;
+        currentKtDbData.rule = document.getElementById('ktDbFactionRule').value.trim();
+
+        if (editingKtDbIndex === -1) { savedKtDbFactions.push(currentKtDbData); } 
+        else { savedKtDbFactions[editingKtDbIndex] = currentKtDbData; }
+
+        localStorage.setItem('killteam_db_factions', JSON.stringify(savedKtDbFactions));
+        openKtDbList();
+    }
+
+    function deleteKtDbFaction(index) {
+        if(confirm('이 팩션 DB를 삭제하시겠습니까?\n(이미 이 팩션으로 만든 로스터는 지워지지 않습니다.)')) {
+            savedKtDbFactions.splice(index, 1);
+            localStorage.setItem('killteam_db_factions', JSON.stringify(savedKtDbFactions));
+            openFactions.clear(); 
+            renderKtDbList();
+        }
+    }
+
+    function renderKtDbList() {
+        const container = document.getElementById('kt-db-list-container');
+        container.innerHTML = '';
+        if (savedKtDbFactions.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#7f8fa6; margin-top:50px;">저장된 팩션 DB가 없습니다.<br>우측 상단의 + 버튼을 눌러 새 팩션을 등록해주세요.</p>';
+            return;
+        }
+        
+        savedKtDbFactions.forEach((faction, factionIndex) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const isActive = openFactions.has(factionIndex) ? 'active' : '';
+            const iconStr = openFactions.has(factionIndex) ? '▲' : '▼';
+            const cleanName = faction.name ? faction.name.trim() : '';
+
+            let html = `
+                <div class="faction-header" onclick="toggleKtDbFactionContent(${factionIndex})">
+                    <h3 style="margin:0;">${cleanName} <span id="kt-db-faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-small btn-outline" style="border:none; color:#27ae60; padding:5px; font-weight:bold;" onclick="event.stopPropagation(); exportSingleData(${factionIndex}, 'killteam_db')">공유</button>
+                        <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); editKtDbFaction(${factionIndex})">수정</button>
+                        <button class="btn-small btn-outline" style="border:none; color:var(--danger-color); padding:5px;" onclick="event.stopPropagation(); deleteKtDbFaction(${factionIndex})">삭제</button>
+                    </div>
+                </div>
+                <div class="faction-content ${isActive}" id="kt-db-faction-content-${factionIndex}">
+            `;
+            if (faction.rule) {
+                html += `<div class="faction-rule-box"><strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong><div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule.trim()}</div></div>`;
+            }
+
+            gameConfig.killteam.phases.forEach(phase => {
+                if(faction.phases && faction.phases[phase] && faction.phases[phase].length > 0) {
+                    html += `<div style="font-weight:bold; color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:10px; margin-top:15px;">[${phase}] 유닛 목록</div>`;
+                    
+                    faction.phases[phase].forEach((u, i) => {
+                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
+                        html += `
+                            <div class="unit-item" onclick="event.stopPropagation()" style="padding:10px 0;">
+                                <div style="display:flex; align-items:flex-start; width:100%;">
+                                    ${imgTag}
+                                    <div style="flex-grow:1; padding-top: 4px;">
+                                        <div class="unit-name">${i + 1}. ${u.name ? u.name.trim() : ''}</div>
+                                        <div style="font-size:12px; color:#7f8fa6; margin-top:3px;">${u.weapons && u.weapons.length > 0 ? '(무기 등록됨)' : ''}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            html += `</div>`; 
+            card.innerHTML = html;
+            container.appendChild(card);
+        });
+    }
+
+    
+    // =========================================================================
+    // [2단계] 킬팀 로스터 관리 
+    // =========================================================================
+
+    function initKtRosterEditScreen() {
+        editingKtRosterIndex = -1;
+        currentKtRoster = { id: generateId(), name: '', factionDbId: '', rule: '', phases: {} };
+        gameConfig.killteam.phases.forEach(p => currentKtRoster.phases[p] = []);
+
+        document.getElementById('kt-roster-edit-title').innerText = "새 로스터 편성";
+        document.getElementById('ktRosterName').value = '';
+        document.getElementById('kt-roster-phases-wrapper').style.display = 'none';
+        
+        savedKtDbFactions = JSON.parse(localStorage.getItem('killteam_db_factions')) || [];
+
+        const select = document.getElementById('ktRosterFactionSelect');
+        select.innerHTML = '<option value="">팩션을 선택하세요</option>';
+        savedKtDbFactions.forEach(fac => {
+            select.innerHTML += `<option value="${fac.id}">${fac.name}</option>`;
+        });
+
+        navTo('screen-kt-roster-edit');
+    }
+
+    function editKtRoster(index) {
+        editingKtRosterIndex = index;
+        const roster = savedFactions[index];
+        currentKtRoster = JSON.parse(JSON.stringify(roster));
+        
+        document.getElementById('kt-roster-edit-title').innerText = "로스터 수정";
+        document.getElementById('ktRosterName').value = currentKtRoster.name ? currentKtRoster.name.trim() : '';
+        
+        savedKtDbFactions = JSON.parse(localStorage.getItem('killteam_db_factions')) || [];
+
+        const select = document.getElementById('ktRosterFactionSelect');
+        select.innerHTML = '<option value="">팩션을 선택하세요</option>';
+        
+        let factionExists = false;
+        savedKtDbFactions.forEach(fac => {
+            let selected = '';
+            if(String(fac.id) === String(currentKtRoster.factionDbId)) { selected = 'selected'; factionExists = true; }
+            select.innerHTML += `<option value="${fac.id}" ${selected}>${fac.name}</option>`;
+        });
+
+        if(!factionExists && currentKtRoster.factionDbId) {
+            select.innerHTML += `<option value="${currentKtRoster.factionDbId}" selected>(삭제된 팩션 데이터입니다)</option>`;
+        }
+
+        renderKtRosterPhases(true); // Edit 모드
+        navTo('screen-kt-roster-edit');
+    }
+
+    function renderKtRosterPhases(isEditMode = false) {
+        const select = document.getElementById('ktRosterFactionSelect');
+        const factionId = select.value;
+        const wrapper = document.getElementById('kt-roster-phases-wrapper');
+        const container = document.getElementById('kt-roster-phases-container');
+        
+        if(!factionId) {
+            wrapper.style.display = 'none';
+            return;
+        }
+        
+        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(factionId));
+        
+        if(dbFaction && !isEditMode) {
+            currentKtRoster.factionDbId = dbFaction.id;
+            currentKtRoster.rule = dbFaction.rule; 
+            gameConfig.killteam.phases.forEach(p => currentKtRoster.phases[p] = []);
+        }
+
+        // 아코디언 상태 보존
+        let openPhases = [];
+        const existingContents = container.querySelectorAll('.phase-content');
+        existingContents.forEach((el, idx) => {
+            if(el.classList.contains('active')) openPhases.push(idx);
+        });
+        if(openPhases.length === 0 && !isEditMode) openPhases.push(0);
+
+        container.innerHTML = '';
+        wrapper.style.display = 'block';
+
+        gameConfig.killteam.phases.forEach((phase, phaseIndex) => {
+            const phaseWrapper = document.createElement('div');
+            const header = document.createElement('div');
+            header.className = 'phase-header';
+            header.innerHTML = `<span>${phase}</span> <span>▼</span>`;
+            
+            const content = document.createElement('div');
+            content.className = 'phase-content';
+            if(openPhases.includes(phaseIndex)) content.classList.add('active'); 
+
+            header.onclick = () => togglePhase(content);
+
+            let unitPool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
+            if(unitPool.length === 0 && isEditMode && currentKtRoster.phases[phase]) {
+                unitPool = currentKtRoster.phases[phase];
+            }
+
+            if(!unitPool || unitPool.length === 0) {
+                content.innerHTML = '<p style="color:#7f8fa6; font-size:13px; text-align:center;">선택할 유닛이 없습니다.</p>';
+            } else {
+                unitPool.forEach((u, uIndex) => {
+                    const checkboxId = `roster-chk-${phaseIndex}-${uIndex}`;
+                    const detailId = `roster-detail-${phaseIndex}-${uIndex}`;
+                    const iconId = `roster-icon-${phaseIndex}-${uIndex}`;
+
+                    let rosterUnit = currentKtRoster.phases[phase].find(item => item.id === u.id);
+                    const isChecked = rosterUnit ? true : false;
+                    const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')" style="margin-top:0;">` : ''; 
+                    
+                    let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
+                    let equipmentHTML = '';
+                    let weaponHTML = '';
+
+                    if(phase === 'Firefight Phase') {
+                        let apArray = u.apAbilities || [];
+                        if (apArray.length > 0) {
+                            equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
+                        }
+                        
+                        let wepArray = u.weapons || [];
+                        if (wepArray.length > 0) {
+                            weaponHTML = `
+                                <div class="weapon-table">
+                                    <div class="weapon-table-header" style="grid-template-columns: 30px 30px 3fr 1fr 1fr 1.8fr 2fr;">
+                                        <div>선택</div><div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
+                                    </div>
+                                    ${wepArray.map((w, wIndex) => {
+                                        let isWepChecked = false;
+                                        if(rosterUnit) {
+                                            isWepChecked = rosterUnit.weapons.some(rw => rw.name === w.name && rw.atk === w.atk && rw.hit === w.hit);
+                                        }
+
+                                        return `
+                                        <div class="weapon-table-row" style="grid-template-columns: 30px 30px 3fr 1fr 1fr 1.8fr 2fr;">
+                                            <div>
+                                                <input type="checkbox" class="wep-chk-${u.id}" style="margin:0; transform:scale(1.2);" 
+                                                    ${rosterUnit ? '' : 'disabled'} 
+                                                    ${isWepChecked ? 'checked' : ''} 
+                                                    onchange="toggleRosterWeapon(this.checked, '${phase}', '${u.id}', ${wIndex})">
+                                            </div>
+                                            <div style="font-size:16px;">${w.type || '🔫'}</div>
+                                            <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name ? w.name.trim() : '-'}</div>
+                                            <div>${w.atk !== '' ? w.atk : '-'}</div>
+                                            <div>${w.hit !== '' ? w.hit : '-'}</div>
+                                            <div>${w.dmg || '-'}</div>
+                                            <div style="font-size:11px;">${w.wr ? w.wr.trim() : '-'}</div>
+                                        </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            `;
+                        }
+                    }
+
+                    content.innerHTML += `
+                        <div class="unit-item" style="padding:10px 5px; border-bottom:1px solid #f1f2f6;">
+                            <div style="display:flex; align-items:center; width:100%;">
+                                <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleRosterUnit(this.checked, '${phase}', '${u.id}')" style="margin-top:0;">
+                                <div style="flex-grow:1; display:flex; justify-content:space-between; align-items:center; padding-left:10px; cursor:pointer;" onclick="toggleDetail('${detailId}', '${iconId}')">
+                                    <div class="unit-name" style="font-size:15px; margin:0;">${u.name ? u.name.trim() : ''}</div>
+                                    <div id="${iconId}" style="font-size:12px; color:#7f8fa6; font-weight:normal;">▼ 펼치기</div>
+                                </div>
+                            </div>
+                            <div id="${detailId}" class="detail-content">
+                                <div style="display:flex; width:100%;">
+                                    ${imgTag}
+                                    <div style="flex-grow:1;">
+                                        ${abilityHTML}
+                                        ${equipmentHTML}
+                                        ${weaponHTML}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            phaseWrapper.appendChild(header);
+            phaseWrapper.appendChild(content);
+            container.appendChild(phaseWrapper);
+        });
+    }
+
+    function toggleRosterUnit(isChecked, phase, unitId) {
+        if(isChecked) {
+            let select = document.getElementById('ktRosterFactionSelect');
+            let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(select.value));
+            
+            let pool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
+            let unitToCopy = pool.find(u => u.id === unitId);
+            
+            if(!unitToCopy) {
+                if(currentKtRoster.phases[phase]) {
+                    let found = currentKtRoster.phases[phase].find(x => x.id === unitId);
+                    if(found) unitToCopy = found;
+                }
+            }
+            if(unitToCopy) {
+                let newUnit = JSON.parse(JSON.stringify(unitToCopy));
+                newUnit.checked = false; 
+                currentKtRoster.phases[phase].push(newUnit);
+
+                document.querySelectorAll(`.wep-chk-${unitId}`).forEach(chk => {
+                    chk.disabled = false; chk.checked = true;
+                });
+            }
+        } else {
+            currentKtRoster.phases[phase] = currentKtRoster.phases[phase].filter(u => u.id !== unitId);
+            
+            document.querySelectorAll(`.wep-chk-${unitId}`).forEach(chk => {
+                chk.disabled = true; chk.checked = false;
             });
         }
     }
 
-    function removeUnit(phase, index) {
-        currentData[phase].splice(index, 1);
-        renderUnitsInEdit(phase);
-    }
+    function toggleRosterWeapon(isChecked, phase, unitId, wIndex) {
+        let rosterUnit = currentKtRoster.phases[phase].find(u => u.id === unitId);
+        if(!rosterUnit) return;
 
-    function saveFaction() {
-        const factionName = document.getElementById('factionName').value.trim();
-        const factionRule = document.getElementById('factionRule').value.trim(); 
+        let select = document.getElementById('ktRosterFactionSelect');
+        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(select.value));
         
-        if (!factionName) {
-            alert('팩션(팀) 이름을 입력해주세요.');
-            return;
+        let pool = dbFaction && dbFaction.phases ? dbFaction.phases[phase] : [];
+        if (pool.length === 0 && currentKtRoster.phases[phase]) {
+            pool = currentKtRoster.phases[phase]; 
         }
+        
+        let dbUnit = pool.find(u => u.id === unitId);
+        if(!dbUnit) return;
+        let targetWeapon = dbUnit.weapons[wIndex];
 
-        if (editingIndex === -1) {
-            const newEntry = {
-                id: Date.now(),
-                name: factionName,
-                rule: factionRule, 
-                phases: currentData
-            };
-            savedFactions.push(newEntry);
+        if(isChecked) {
+            rosterUnit.weapons.push(JSON.parse(JSON.stringify(targetWeapon)));
+            rosterUnit.weapons.sort((a, b) => {
+                let idxA = dbUnit.weapons.findIndex(w => w.name === a.name && w.atk === a.atk && w.hit === a.hit);
+                let idxB = dbUnit.weapons.findIndex(w => w.name === b.name && w.atk === b.atk && w.hit === b.hit);
+                return idxA - idxB;
+            });
         } else {
-            savedFactions[editingIndex].name = factionName;
-            savedFactions[editingIndex].rule = factionRule; 
-            savedFactions[editingIndex].phases = currentData;
+            let wIndexToRemove = rosterUnit.weapons.findIndex(rw => rw.name === targetWeapon.name && rw.atk === targetWeapon.atk && rw.hit === targetWeapon.hit);
+            if(wIndexToRemove !== -1) rosterUnit.weapons.splice(wIndexToRemove, 1);
         }
-
-        localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
-        navTo('screen-list');
     }
+
+    function saveKtRoster() {
+        const name = document.getElementById('ktRosterName').value.trim();
+        const select = document.getElementById('ktRosterFactionSelect');
+        const factionId = select.value;
+
+        if(!name) { alert('로스터 이름을 입력해주세요.'); return; }
+        if(!factionId) { alert('팩션을 선택해주세요.'); return; }
+
+        currentKtRoster.name = name;
+        currentKtRoster.factionDbId = factionId;
+        
+        let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(factionId));
+        if(dbFaction) currentKtRoster.rule = dbFaction.rule;
+
+        if (editingKtRosterIndex === -1) { savedFactions.push(currentKtRoster); } 
+        else { savedFactions[editingKtRosterIndex] = currentKtRoster; }
+
+        localStorage.setItem('killteam_factions', JSON.stringify(savedFactions));
+        openKtRosterList();
+    }
+
+
+    // =========================================================================
+    // [공용 기능] 리스트 렌더링 (플레이 뷰)
+    // =========================================================================
 
     function renderFactionList() {
         const container = document.getElementById('faction-list-container');
@@ -1059,75 +1175,60 @@
         savedFactions.forEach((faction, factionIndex) => {
             const card = document.createElement('div');
             card.className = 'card';
-            
             const isActive = openFactions.has(factionIndex) ? 'active' : '';
             const iconStr = openFactions.has(factionIndex) ? '▲' : '▼';
-
-            // 제목 공백 제거
-            const cleanFactionName = faction.name ? faction.name.trim() : '';
+            const cleanName = faction.name ? faction.name.trim() : '';
 
             let html = `
                 <div class="faction-header" onclick="toggleFactionContent(${factionIndex})">
-                    <h3 style="margin:0;">${cleanFactionName} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
+                    <h3 style="margin:0; white-space: pre-wrap;">${cleanName} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
                     <div style="display:flex; gap:5px;">
-                        <button class="btn-small btn-outline" style="border:none; color:#27ae60; padding:5px; font-weight:bold;" onclick="event.stopPropagation(); exportSingleFaction(${factionIndex})">공유</button>
-                        <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); editFaction(${factionIndex})">수정</button>
+                        <button class="btn-small btn-outline" style="border:none; color:#27ae60; padding:5px; font-weight:bold;" onclick="event.stopPropagation(); exportSingleData(${factionIndex}, currentGameKey)">공유</button>
+                        <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); ${currentGameKey === 'killteam' ? `editKtRoster(${factionIndex})` : `editFaction(${factionIndex})`}">수정</button>
                         <button class="btn-small btn-outline" style="border:none; color:var(--danger-color); padding:5px;" onclick="event.stopPropagation(); deleteFaction(${factionIndex})">삭제</button>
                     </div>
                 </div>
-                
                 <div class="faction-content ${isActive}" id="faction-content-${factionIndex}">
             `;
 
             if (currentGameKey === 'killteam' && faction.rule) {
-                // 팩션 룰 공백 제거
-                html += `
-                    <div class="faction-rule-box">
-                        <strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong>
-                        <div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule.trim()}</div>
-                    </div>
-                `;
+                html += `<div class="faction-rule-box"><strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong><div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule.trim()}</div></div>`;
             }
 
             html += `
                     <div style="text-align: right; margin-bottom: 15px;">
-                        <button class="btn-small btn-warning" onclick="event.stopPropagation(); resetChecks(${factionIndex})">
-                            ⟳ 라운드 리셋 (체크 해제)
-                        </button>
+                        <button class="btn-small btn-warning" onclick="event.stopPropagation(); resetChecks(${factionIndex})">⟳ 라운드 리셋 (체크 해제)</button>
                     </div>
             `;
 
             let hasUnits = false;
-            currentPhases.forEach(phase => {
+            const phaseList = gameConfig[currentGameKey].phases;
+            
+            phaseList.forEach(phase => {
                 const units = faction.phases[phase] || [];
                 if (units.length > 0) {
                     hasUnits = true;
                     html += `<div style="margin-top:10px; font-weight:bold; color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px;">[${phase}]</div>`;
                     
                     units.forEach((u, unitIndex) => {
-                        const checkboxId = `chk-${factionIndex}-${phase}-${unitIndex}`;
+                        const checkboxId = `chk-${factionIndex}-${phase.replace(/\s/g,'')}-${unitIndex}`;
+                        const detailId = `view-detail-${factionIndex}-${phase.replace(/\s/g,'')}-${unitIndex}`;
+                        const iconId = `view-icon-${factionIndex}-${phase.replace(/\s/g,'')}-${unitIndex}`;
+
                         const isChecked = u.checked ? 'checked' : '';
-                        
-                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
+                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')" style="margin-top:0;">` : ''; 
                         
                         let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
-                        
                         let equipmentHTML = '';
                         let weaponHTML = '';
 
                         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                             let apArray = u.apAbilities || [];
-                            if (u.equipment) apArray.push(u.equipment); 
-                            
                             if (apArray.length > 0) {
                                 equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                             }
                             
                             let wepArray = u.weapons || [];
-                            if(u.wepName || u.wepAtk || u.wepHit || u.wepDmg || u.wepWr) {
-                                wepArray.push({type: u.wepType||'🔫', name: u.wepName, atk: u.wepAtk, hit: u.wepHit, dmg: u.wepDmg, wr: u.wepWr});
-                            }
-
                             if (wepArray.length > 0) {
                                 weaponHTML = `
                                     <div class="weapon-table">
@@ -1149,21 +1250,22 @@
                             }
                         }
 
-                        // 레이아웃 분리
                         html += `
-                            <div class="unit-item" onclick="event.stopPropagation()">
-                                <div style="display:flex; align-items:flex-start; width:100%;">
-                                    <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
-                                    ${imgTag}
-                                    <div style="flex-grow:1; padding-top: 4px;">
-                                        <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name ? u.name.trim() : ''}</label>
+                            <div class="unit-item" style="padding:10px 5px;">
+                                <div style="display:flex; align-items:center; width:100%;">
+                                    <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onclick="event.stopPropagation()" onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)" style="margin-top:0;">
+                                    <div style="flex-grow:1; display:flex; justify-content:space-between; align-items:center; padding-left:10px; cursor:pointer;" onclick="toggleDetail('${detailId}', '${iconId}')">
+                                        <label for="${checkboxId}" class="unit-name" style="margin:0; font-size:15px; cursor:pointer;">${u.name ? u.name.trim() : ''}</label>
+                                        <div id="${iconId}" style="font-size:12px; color:#7f8fa6; font-weight:normal;">▼ 펼치기</div>
                                     </div>
                                 </div>
-
-                                <div style="margin-top: 12px; width: 100%;">
-                                    ${abilityHTML}
-                                    ${equipmentHTML}
-                                    ${weaponHTML}
+                                <div id="${detailId}" class="detail-content">
+                                    <div style="display:flex; width:100%;">
+                                        ${imgTag}
+                                        <div style="flex-grow:1;">
+                                            ${abilityHTML} ${equipmentHTML} ${weaponHTML}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -1174,7 +1276,6 @@
             if(!hasUnits && (!faction.rule || currentGameKey !== 'killteam')) {
                 html += `<p style="text-align:center; color:#7f8fa6; font-size:14px;">저장된 유닛/능력이 없습니다.</p>`;
             }
-
             html += `</div>`; 
             card.innerHTML = html;
             container.appendChild(card);
@@ -1188,7 +1289,7 @@
 
     function resetChecks(factionIndex) {
         if(confirm('이 리스트의 모든 체크를 초기화하여 다음 라운드를 준비하시겠습니까?')) {
-            currentPhases.forEach(phase => {
+            gameConfig[currentGameKey].phases.forEach(phase => {
                 if(savedFactions[factionIndex].phases[phase]) {
                     savedFactions[factionIndex].phases[phase].forEach(u => u.checked = false);
                 }
@@ -1207,13 +1308,276 @@
         }
     }
 
+
+    // =========================================================================
+    // [공용] 공유, 내보내기/불러오기
+    // =========================================================================
+
+    function exportSingleData(index, key) {
+        let dataObj;
+        if(key === 'killteam_db') dataObj = savedKtDbFactions[index];
+        else dataObj = savedFactions[index];
+
+        const exportObj = { game: key, data: dataObj };
+        const code = btoa(encodeURIComponent(JSON.stringify(exportObj)));
+        
+        document.getElementById('codeModalTitle').innerText = '🚀 리스트 공유(코드)';
+        document.getElementById('codeModalDesc').innerText = '아래 코드를 복사하여 친구에게 주거나 다른 기기에서 불러오세요.';
+        
+        const textArea = document.getElementById('codeModalText');
+        textArea.value = code; textArea.readOnly = true;
+        
+        const actionBtn = document.getElementById('codeModalActionBtn');
+        actionBtn.innerText = '📋 복사하기'; actionBtn.style.backgroundColor = '#27ae60';
+        actionBtn.onclick = function() {
+            textArea.select(); document.execCommand('copy');
+            alert('코드가 클립보드에 복사되었습니다!'); closeCodeModal();
+        };
+        document.getElementById('codeModal').style.display = 'flex';
+    }
+
+    function openImportModal(key) {
+        let typeName = (key === 'killteam_db') ? '팩션 DB' : '로스터';
+
+        document.getElementById('codeModalTitle').innerText = `⬇️ ${typeName} 불러오기`;
+        document.getElementById('codeModalDesc').innerText = '복사해온 코드를 아래에 붙여넣어 추가하세요. (기존 데이터는 지워지지 않습니다!)';
+        
+        const textArea = document.getElementById('codeModalText');
+        textArea.value = ''; textArea.readOnly = false; textArea.placeholder = '여기에 코드를 붙여넣으세요...';
+        
+        const actionBtn = document.getElementById('codeModalActionBtn');
+        actionBtn.innerText = '추가하기'; actionBtn.style.backgroundColor = 'var(--accent-color)';
+        actionBtn.onclick = function() {
+            const code = textArea.value.trim();
+            if(!code) { alert('코드를 입력하세요.'); return; }
+            try {
+                const jsonStr = decodeURIComponent(atob(code));
+                const importObj = JSON.parse(jsonStr);
+                
+                if(importObj.game !== key) {
+                    alert(`⚠️ 데이터 형식이 맞지 않습니다. 이 코드는 [${importObj.game}] 데이터입니다.`);
+                    return;
+                }
+                
+                importObj.data.id = generateId(); 
+                
+                if(key === 'killteam_db') {
+                    savedKtDbFactions.push(importObj.data);
+                    localStorage.setItem('killteam_db_factions', JSON.stringify(savedKtDbFactions));
+                    renderKtDbList();
+                } else {
+                    savedFactions.push(importObj.data);
+                    localStorage.setItem(key + '_factions', JSON.stringify(savedFactions));
+                    renderFactionList();
+                }
+                
+                closeCodeModal();
+                alert(`'${importObj.data.name}' 데이터가 성공적으로 추가되었습니다!`);
+            } catch(e) { alert('유효하지 않은 코드입니다.'); }
+        };
+        document.getElementById('codeModal').style.display = 'flex';
+    }
+
+    function closeCodeModal() { document.getElementById('codeModal').style.display = 'none'; }
+
+
+    // =========================================================================
+    // [스피어헤드 전용] 기존 수정 로직 유지
+    // =========================================================================
+
+    function initEditScreen() {
+        document.getElementById('factionName').value = '';
+        currentData = {}; tempImages = {}; 
+        currentPhases = gameConfig[currentGameKey].phases;
+        currentPhases.forEach(p => currentData[p] = []); 
+        renderPhases();
+    }
+
+    function editFaction(index) {
+        editingIndex = index;
+        const faction = savedFactions[index];
+        currentData = JSON.parse(JSON.stringify(faction.phases));
+        currentPhases = gameConfig[currentGameKey].phases;
+        
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById('screen-edit').classList.add('active');
+        
+        document.getElementById('edit-title').innerText = "리스트 수정";
+        document.getElementById('factionName').value = faction.name ? faction.name.trim() : '';
+        tempImages = {}; renderPhases();
+    }
+
+    function saveFaction() {
+        const factionName = document.getElementById('factionName').value.trim();
+        if (!factionName) { alert('이름을 입력해주세요.'); return; }
+
+        if (editingIndex === -1) {
+            savedFactions.push({ id: generateId(), name: factionName, phases: currentData });
+        } else {
+            savedFactions[editingIndex].name = factionName;
+            savedFactions[editingIndex].phases = currentData;
+        }
+        localStorage.setItem(currentGameKey + '_factions', JSON.stringify(savedFactions));
+        navTo('screen-list');
+    }
+
+    function renderPhases() {
+        const container = document.getElementById('phases-container');
+        container.innerHTML = '';
+
+        currentPhases.forEach(phase => {
+            const phaseWrapper = document.createElement('div');
+            const header = document.createElement('div');
+            header.className = 'phase-header';
+            header.innerHTML = `<span>${phase}</span> <span>▼</span>`;
+            header.onclick = () => togglePhase(content);
+
+            const content = document.createElement('div');
+            content.className = 'phase-content';
+            content.id = `list-${phase.replace(/\s/g,'')}-wrapper`;
+
+            const unitList = document.createElement('div');
+            unitList.id = `list-${phase.replace(/\s/g,'')}`;
+            
+            const inputArea = document.createElement('div');
+            inputArea.style.marginTop = '10px'; inputArea.style.paddingTop = '10px'; inputArea.style.borderTop = '1px dashed #ccc';
+            
+            const safePhaseId = phase.replace(/\s/g,'');
+
+            inputArea.innerHTML = `
+                <textarea id="unitName-${safePhaseId}" class="u-textarea" placeholder="유닛 이름 (필수)" rows="1" style="margin-bottom:5px; border-color:var(--accent-color);"></textarea>
+                <textarea id="unitAbility-${safePhaseId}" class="u-textarea" placeholder="사용할 능력 (선택)" rows="2" style="margin-bottom:5px;"></textarea>
+                
+                <div style="display:flex; align-items:center; margin-bottom:15px; gap: 10px;">
+                    <label class="file-upload-label">
+                        📷 앨범/사진 첨부 (선택)
+                        <input type="file" id="unitImage-${safePhaseId}" accept="image/*" style="display:none;" onchange="handleImageSelect(event, '${safePhaseId}')">
+                    </label>
+                    <img id="preview-${safePhaseId}" src="" style="display:none; width:40px; height:40px; object-fit:cover; border-radius:5px; border:1px solid #ccc;">
+                    <span id="preview-text-${safePhaseId}" style="font-size:12px; color:#7f8fa6; display:none;">준비됨!</span>
+                </div>
+                <button class="btn btn-small" onclick="addUnit('${phase}')" style="width:100%">+ 이 페이즈에 추가</button>
+            `;
+
+            content.appendChild(unitList);
+            content.appendChild(inputArea);
+            phaseWrapper.appendChild(header);
+            phaseWrapper.appendChild(content);
+            container.appendChild(phaseWrapper);
+
+            renderUnitsInEdit(phase);
+        });
+    }
+
+    function addUnit(phase) {
+        const safePhaseId = phase.replace(/\s/g,'');
+        const nameInput = document.getElementById(`unitName-${safePhaseId}`);
+        const abilityInput = document.getElementById(`unitAbility-${safePhaseId}`);
+        if (!nameInput.value.trim()) { alert('유닛 이름은 필수입니다.'); nameInput.focus(); return; }
+        if (!currentData[phase]) currentData[phase] = [];
+
+        currentData[phase].push({
+            id: generateId(),
+            name: nameInput.value.trim(),
+            ability: abilityInput.value.trim(),
+            image: tempImages[safePhaseId] || null, 
+            checked: false
+        });
+
+        nameInput.value = ''; abilityInput.value = ''; tempImages[safePhaseId] = null;
+        document.getElementById(`unitImage-${safePhaseId}`).value = '';
+        document.getElementById(`preview-${safePhaseId}`).style.display = 'none';
+        document.getElementById(`preview-text-${safePhaseId}`).style.display = 'none';
+        
+        renderUnitsInEdit(phase);
+    }
+
+    function editUnitItem(phase, index) {
+        const safePhaseId = phase.replace(/\s/g,'');
+        const item = currentData[phase][index];
+        document.getElementById(`unitName-${safePhaseId}`).value = item.name ? item.name.trim() : '';
+        document.getElementById(`unitAbility-${safePhaseId}`).value = item.ability ? item.ability.trim() : '';
+        
+        if(item.image) {
+            tempImages[safePhaseId] = item.image;
+            document.getElementById(`preview-${safePhaseId}`).src = item.image;
+            document.getElementById(`preview-${safePhaseId}`).style.display = 'block';
+            document.getElementById(`preview-text-${safePhaseId}`).style.display = 'inline-block';
+        } else {
+            tempImages[safePhaseId] = null;
+            document.getElementById(`preview-${safePhaseId}`).style.display = 'none';
+            document.getElementById(`preview-text-${safePhaseId}`).style.display = 'none';
+        }
+
+        currentData[phase].splice(index, 1);
+        renderUnitsInEdit(phase);
+        document.getElementById(`unitName-${safePhaseId}`).focus();
+    }
+
+    // 스피어헤드용 드래그
+    function dragStart(e, phase, index) { draggedItem = { phase: phase, index: index }; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => { e.target.style.opacity = '0.4'; }, 0); }
+    function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function drop(e, targetPhase, targetIndex) {
+        e.preventDefault(); e.target.style.opacity = '1';
+        if (draggedItem && draggedItem.phase === targetPhase && draggedItem.index !== targetIndex) {
+            const arr = currentData[targetPhase];
+            const itemToMove = arr.splice(draggedItem.index, 1)[0];
+            arr.splice(targetIndex, 0, itemToMove);
+            renderUnitsInEdit(targetPhase);
+        }
+        draggedItem = null;
+    }
+    function dragEnd(e) { e.target.style.opacity = '1'; draggedItem = null; }
+    function moveUnitUp(phase, index) { if (index > 0) { const arr = currentData[phase]; const temp = arr[index]; arr[index] = arr[index - 1]; arr[index - 1] = temp; renderUnitsInEdit(phase); } }
+    function moveUnitDown(phase, index) { const arr = currentData[phase]; if (index < arr.length - 1) { const temp = arr[index]; arr[index] = arr[index + 1]; arr[index + 1] = temp; renderUnitsInEdit(phase); } }
+
+    function renderUnitsInEdit(phase) {
+        const safePhaseId = phase.replace(/\s/g,'');
+        const listContainer = document.getElementById(`list-${safePhaseId}`);
+        listContainer.innerHTML = '';
+        
+        if(currentData[phase]) {
+            currentData[phase].forEach((item, index) => {
+                const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
+                let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
+
+                listContainer.innerHTML += `
+                    <div class="unit-item" draggable="true" 
+                         ondragstart="dragStart(event, '${phase}', ${index})" ondragover="dragOver(event)" 
+                         ondrop="drop(event, '${phase}', ${index})" ondragend="dragEnd(event)">
+                         
+                        <div style="display:flex; align-items:flex-start; width:100%;">
+                            <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
+                            ${imgTag}
+                            <div style="flex-grow:1; padding-top: 4px;">
+                                <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
+                                <div style="display:flex; gap:2px; width: 100%;">
+                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitUp('${phase}', ${index})">▲</button>
+                                    <button class="btn-small btn-outline" style="border:1px solid #dcdde1; padding:4px 0; flex:1; background-color:#f8f9fa; color:#2c3e50;" onclick="moveUnitDown('${phase}', ${index})">▼</button>
+                                </div>
+                                <div style="display:flex; gap:2px; width: 100%;">
+                                    <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:4px 0; flex:1;" onclick="editUnitItem('${phase}', ${index})">수정</button>
+                                    <button class="btn-small btn-outline" style="border:none; color:red; padding:4px 0; flex:1;" onclick="removeUnit('${phase}', ${index})">삭제</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 12px; width: 100%;">
+                            ${abilityHTML}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function removeUnit(phase, index) { currentData[phase].splice(index, 1); renderUnitsInEdit(phase); }
+
+    // 서비스 워커
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                console.log('Service worker registered!', reg);
-            }).catch(err => {
-                console.log('Service worker registration failed:', err);
-            });
+            navigator.serviceWorker.register('./sw.js').catch(err => { console.log('SW fail:', err); });
         });
     }
 </script>
