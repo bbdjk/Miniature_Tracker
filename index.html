@@ -136,6 +136,20 @@
             font-size: 13px; 
             font-family: inherit;
         }
+        
+        select.u-select {
+            width: 100%;
+            padding: 6px 0;
+            box-sizing: border-box;
+            border: 1px solid #dcdde1;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: inherit;
+            text-align: center;
+            text-align-last: center;
+            background-color: white;
+            cursor: pointer;
+        }
 
         /* 페이즈 아코디언 스타일 */
         .phase-header {
@@ -160,7 +174,7 @@
         }
         .phase-content.active { display: block; }
 
-        /* 유닛 및 능력 리스트 아이템 (레이아웃 Block으로 변경하여 아래로 떨어지게 함) */
+        /* 유닛 및 능력 리스트 아이템 (레이아웃 Block으로 복구 - 여기서 오류가 났었습니다!) */
         .unit-item {
             display: block; 
             padding: 15px 10px;
@@ -227,7 +241,7 @@
         }
         .weapon-table-header {
             display: grid;
-            grid-template-columns: 30px 3fr 1fr 1fr 1fr 2fr;
+            grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;
             background-color: #f1f2f6;
             padding: 6px 4px;
             text-align: center;
@@ -237,7 +251,7 @@
         }
         .weapon-table-row {
             display: grid;
-            grid-template-columns: 30px 3fr 1fr 1fr 1fr 2fr;
+            grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;
             padding: 8px 4px;
             text-align: center;
             align-items: center;
@@ -444,8 +458,14 @@
         }
     }
 
+    function makeNumberOptions(selectedValue) {
+        let opts = `<option value="" ${selectedValue === '' ? 'selected' : ''}>-</option>`;
+        for(let i=0; i<=9; i++) {
+            opts += `<option value="${i}" ${String(selectedValue) === String(i) ? 'selected' : ''}>${i}</option>`;
+        }
+        return opts;
+    }
 
-    // --- 무기 & AP 다중 추가를 위한 HTML 생성 함수 ---
     function addApRow(phase, value = '') {
         const container = document.getElementById(`ap-container-${phase}`);
         const div = document.createElement('div');
@@ -462,20 +482,34 @@
         const div = document.createElement('div');
         div.className = 'weapon-input-row';
         div.style.display = 'grid';
-        div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1fr 2fr 30px';
+        div.style.gridTemplateColumns = '45px 3fr 1fr 1fr 1.8fr 2fr 30px';
         div.style.gap = '4px';
         div.style.marginBottom = '4px';
         div.style.alignItems = 'center';
         
+        let d1 = '', d2 = '';
+        if(wep.dmg && String(wep.dmg).includes('/')) {
+            [d1, d2] = wep.dmg.split('/');
+        } else if (wep.dmg) {
+            d1 = wep.dmg;
+        }
+
         div.innerHTML = `
-            <select class="u-input wep-type" style="padding:0; text-align:center; font-size:16px; cursor:pointer;">
+            <select class="u-select wep-type" style="padding:4px 0; font-size:16px;">
                 <option value="🔫" ${wep.type === '🔫' ? 'selected' : ''}>🔫</option>
                 <option value="🗡️" ${wep.type === '🗡️' ? 'selected' : ''}>🗡️</option>
             </select>
             <input type="text" class="u-input wep-name" placeholder="무기명" value="${wep.name}">
-            <input type="text" class="u-input wep-atk" placeholder="A" style="text-align:center;" value="${wep.atk}">
-            <input type="text" class="u-input wep-hit" placeholder="H" style="text-align:center;" value="${wep.hit}">
-            <input type="text" class="u-input wep-dmg" placeholder="D" style="text-align:center;" value="${wep.dmg}">
+            
+            <select class="u-select wep-atk">${makeNumberOptions(wep.atk)}</select>
+            <select class="u-select wep-hit">${makeNumberOptions(wep.hit)}</select>
+            
+            <div style="display:flex; align-items:center; gap: 2px;">
+                <select class="u-select wep-dmg1">${makeNumberOptions(d1)}</select>
+                <span style="color:#7f8fa6;">/</span>
+                <select class="u-select wep-dmg2">${makeNumberOptions(d2)}</select>
+            </div>
+
             <input type="text" class="u-input wep-wr" placeholder="규칙" value="${wep.wr}">
             <button class="btn-small" style="background-color:var(--danger-color); color:white; border:none; padding:4px; border-radius:4px;" onclick="this.parentElement.remove()">✕</button>
         `;
@@ -600,8 +634,9 @@
         document.getElementById('screen-edit').classList.add('active');
         
         document.getElementById('edit-title').innerText = "리스트 수정";
-        document.getElementById('factionName').value = faction.name;
-        document.getElementById('factionRule').value = faction.rule || '';
+        // 기존 데이터에 숨어있는 공백을 완벽 제거(trim)
+        document.getElementById('factionName').value = faction.name ? faction.name.trim() : '';
+        document.getElementById('factionRule').value = faction.rule ? faction.rule.trim() : '';
         
         if(currentGameKey === 'killteam') {
             document.getElementById('killteam-rule-section').style.display = 'block';
@@ -667,7 +702,7 @@
                             <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addApRow('${phase}')">＋ 추가</button>
                         </div>
                         <div id="ap-container-${phase}">
-                            </div>
+                        </div>
                     </div>
                     
                     <div style="background-color: #f8f9fa; border: 1px solid #dcdde1; border-radius: 6px; padding: 10px; margin-bottom: 10px;">
@@ -675,11 +710,11 @@
                             <strong style="font-size:13px; color:var(--primary-color);">[무기 정보 (선택)]</strong>
                             <button class="btn-small btn-outline" style="padding:2px 8px; font-size:11px;" onclick="addWeaponRow('${phase}')">＋ 추가</button>
                         </div>
-                        <div style="display: grid; grid-template-columns: 45px 3fr 1fr 1fr 1fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
+                        <div style="display: grid; grid-template-columns: 45px 3fr 1fr 1fr 1.8fr 2fr 30px; gap: 4px; text-align: center; font-size: 11px; font-weight: bold; color: #7f8fa6; margin-bottom: 2px;">
                             <div>Type</div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div><div></div>
                         </div>
                         <div id="weapon-container-${phase}">
-                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -809,12 +844,19 @@
                 weaponRows.forEach(row => {
                     const type = row.querySelector('.wep-type').value;
                     const name = row.querySelector('.wep-name').value.trim();
-                    const atk = row.querySelector('.wep-atk').value.trim();
-                    const hit = row.querySelector('.wep-hit').value.trim();
-                    const dmg = row.querySelector('.wep-dmg').value.trim();
+                    const atk = row.querySelector('.wep-atk').value;
+                    const hit = row.querySelector('.wep-hit').value;
+                    
+                    const d1 = row.querySelector('.wep-dmg1').value;
+                    const d2 = row.querySelector('.wep-dmg2').value;
+                    let dmg = '';
+                    if (d1 !== '' || d2 !== '') {
+                        dmg = `${d1 || '0'}/${d2 || '0'}`;
+                    }
+
                     const wr = row.querySelector('.wep-wr').value.trim();
                     
-                    if(name || atk || hit || dmg || wr) {
+                    if(name || atk !== '' || hit !== '' || dmg || wr) {
                         unitData.weapons.push({type, name, atk, hit, dmg, wr});
                     }
                 });
@@ -846,8 +888,9 @@
     function editUnitItem(phase, index) {
         const item = currentData[phase][index];
         
-        document.getElementById(`unitName-${phase}`).value = item.name || '';
-        document.getElementById(`unitAbility-${phase}`).value = item.ability || '';
+        // 옛날 데이터 공백 제거
+        document.getElementById(`unitName-${phase}`).value = item.name ? item.name.trim() : '';
+        document.getElementById(`unitAbility-${phase}`).value = item.ability ? item.ability.trim() : '';
         
         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
             const apContainer = document.getElementById(`ap-container-${phase}`);
@@ -856,7 +899,7 @@
                 let apList = item.apAbilities || [];
                 if(item.equipment) apList.push(item.equipment); 
                 if(apList.length === 0) apList = [''];
-                apList.forEach(ap => addApRow(phase, ap));
+                apList.forEach(ap => addApRow(phase, ap.trim()));
             }
 
             const wepContainer = document.getElementById(`weapon-container-${phase}`);
@@ -895,17 +938,16 @@
         if(currentData[phase]) {
             currentData[phase].forEach((item, index) => {
                 const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
-                let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability}</div>` : '';
+                let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
                 let equipmentHTML = '';
                 let weaponHTML = '';
 
-                // 레이아웃 분리: 상단(이미지+이름+버튼), 하단(능력+장비+무기)
                 if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                     let apArray = item.apAbilities || [];
                     if (item.equipment) apArray.push(item.equipment);
                     
                     if (apArray.length > 0) {
-                        equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap}</div>`).join('');
+                        equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                     }
                     
                     let wepArray = item.weapons || [];
@@ -922,11 +964,11 @@
                                 ${wepArray.map(w => `
                                 <div class="weapon-table-row">
                                     <div style="font-size:16px;">${w.type || '🔫'}</div>
-                                    <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
-                                    <div>${w.atk || '-'}</div>
-                                    <div>${w.hit || '-'}</div>
+                                    <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name ? w.name.trim() : '-'}</div>
+                                    <div>${w.atk !== '' ? w.atk : '-'}</div>
+                                    <div>${w.hit !== '' ? w.hit : '-'}</div>
                                     <div>${w.dmg || '-'}</div>
-                                    <div style="font-size:11px;">${w.wr || '-'}</div>
+                                    <div style="font-size:11px;">${w.wr ? w.wr.trim() : '-'}</div>
                                 </div>
                                 `).join('')}
                             </div>
@@ -947,7 +989,7 @@
                             ${imgTag}
                             
                             <div style="flex-grow:1; padding-top: 4px;">
-                                <div class="unit-name">${index + 1}. ${item.name}</div>
+                                <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
                             </div>
                             
                             <div style="display:flex; flex-direction:column; gap:5px; margin-left:10px; flex-shrink:0; width: 70px;">
@@ -1021,9 +1063,12 @@
             const isActive = openFactions.has(factionIndex) ? 'active' : '';
             const iconStr = openFactions.has(factionIndex) ? '▲' : '▼';
 
+            // 제목 공백 제거
+            const cleanFactionName = faction.name ? faction.name.trim() : '';
+
             let html = `
                 <div class="faction-header" onclick="toggleFactionContent(${factionIndex})">
-                    <h3 style="margin:0; white-space: pre-wrap;">${faction.name} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
+                    <h3 style="margin:0;">${cleanFactionName} <span id="faction-icon-${factionIndex}" style="font-size:14px; margin-left:5px; color:#7f8fa6;">${iconStr}</span></h3>
                     <div style="display:flex; gap:5px;">
                         <button class="btn-small btn-outline" style="border:none; color:#27ae60; padding:5px; font-weight:bold;" onclick="event.stopPropagation(); exportSingleFaction(${factionIndex})">공유</button>
                         <button class="btn-small btn-outline" style="border:none; color:var(--accent-color); padding:5px;" onclick="event.stopPropagation(); editFaction(${factionIndex})">수정</button>
@@ -1035,10 +1080,11 @@
             `;
 
             if (currentGameKey === 'killteam' && faction.rule) {
+                // 팩션 룰 공백 제거
                 html += `
                     <div class="faction-rule-box">
                         <strong style="color: var(--primary-color); font-size: 14px; display:block; margin-bottom: 4px;">[팩션 룰]</strong>
-                        <div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule}</div>
+                        <div style="font-size: 14px; color: var(--text-color); white-space: pre-wrap; word-break: break-all;">${faction.rule.trim()}</div>
                     </div>
                 `;
             }
@@ -1063,7 +1109,9 @@
                         const isChecked = u.checked ? 'checked' : '';
                         
                         const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
-                        let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability}</div>` : '';
+                        
+                        let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
+                        
                         let equipmentHTML = '';
                         let weaponHTML = '';
 
@@ -1072,7 +1120,7 @@
                             if (u.equipment) apArray.push(u.equipment); 
                             
                             if (apArray.length > 0) {
-                                equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap}</div>`).join('');
+                                equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                             }
                             
                             let wepArray = u.weapons || [];
@@ -1083,17 +1131,17 @@
                             if (wepArray.length > 0) {
                                 weaponHTML = `
                                     <div class="weapon-table">
-                                        <div class="weapon-table-header">
+                                        <div class="weapon-table-header" style="grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;">
                                             <div></div><div>Name</div><div>ATK</div><div>HIT</div><div>DMG</div><div>WR</div>
                                         </div>
                                         ${wepArray.map(w => `
-                                        <div class="weapon-table-row">
+                                        <div class="weapon-table-row" style="grid-template-columns: 30px 3fr 1fr 1fr 1.8fr 2fr;">
                                             <div style="font-size:16px;">${w.type || '🔫'}</div>
-                                            <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name || '-'}</div>
-                                            <div>${w.atk || '-'}</div>
-                                            <div>${w.hit || '-'}</div>
+                                            <div style="font-weight:bold; text-align:left; padding-left:4px;">${w.name ? w.name.trim() : '-'}</div>
+                                            <div>${w.atk !== '' ? w.atk : '-'}</div>
+                                            <div>${w.hit !== '' ? w.hit : '-'}</div>
                                             <div>${w.dmg || '-'}</div>
-                                            <div style="font-size:11px;">${w.wr || '-'}</div>
+                                            <div style="font-size:11px;">${w.wr ? w.wr.trim() : '-'}</div>
                                         </div>
                                         `).join('')}
                                     </div>
@@ -1101,13 +1149,14 @@
                             }
                         }
 
+                        // 레이아웃 분리
                         html += `
                             <div class="unit-item" onclick="event.stopPropagation()">
                                 <div style="display:flex; align-items:flex-start; width:100%;">
                                     <input type="checkbox" class="unit-checkbox" id="${checkboxId}" ${isChecked} onchange="toggleCheck(${factionIndex}, '${phase}', ${unitIndex}, this.checked)">
                                     ${imgTag}
                                     <div style="flex-grow:1; padding-top: 4px;">
-                                        <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name}</label>
+                                        <label for="${checkboxId}" class="unit-name">${unitIndex + 1}. ${u.name ? u.name.trim() : ''}</label>
                                     </div>
                                 </div>
 
