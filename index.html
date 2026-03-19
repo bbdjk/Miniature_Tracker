@@ -104,7 +104,18 @@
         .unit-item:last-child { border-bottom: none; }
         .unit-checkbox { margin-right: 15px; margin-top: 3px; transform: scale(1.5); cursor: pointer; flex-shrink: 0; }
         
-        .unit-thumb { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; margin-right: 15px; margin-top: 5px; background-color: #ecf0f1; flex-shrink: 0; border: 1px solid #bdc3c7; cursor: pointer; }
+        /* 크고 예쁘게 썸네일 중앙 정렬 (이제 텍스트와 겹치지 않습니다!) */
+        .unit-thumb-large { 
+            width: 120px; 
+            height: 120px; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            margin: 0 auto 15px auto; 
+            background-color: #ecf0f1; 
+            border: 1px solid #bdc3c7; 
+            cursor: pointer; 
+            display: block; 
+        }
         
         .unit-name { font-weight: bold; font-size: 16px; display: block; cursor: pointer; white-space: pre-wrap; word-break: break-all; color: var(--primary-color); margin: 0; }
         .unit-ability { font-size: 14px; color: #7f8fa6; white-space: pre-wrap; word-break: break-all; margin-bottom: 6px; }
@@ -283,7 +294,6 @@
     let openFactions = new Set(); 
     let tempImages = {}; 
 
-    // 상태 변수
     let currentData = {};
     let editingIndex = -1; 
     let currentPhases = [];
@@ -741,7 +751,7 @@
         }
 
         currentKtDbData.phases[phase].forEach((item, index) => {
-            const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
+            const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb-large" onclick="openImageModal('${item.image}')">` : '';
             let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
             
             let equipmentHTML = '';
@@ -782,7 +792,6 @@
                      
                     <div style="display:flex; align-items:flex-start; width:100%;">
                         <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
-                        ${imgTag}
                         <div style="flex-grow:1; padding-top: 4px;">
                             <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
                         </div>
@@ -798,6 +807,7 @@
                         </div>
                     </div>
                     <div style="margin-top: 12px; width: 100%;">
+                        ${item.image ? `<div style="margin-bottom:10px;">${imgTag}</div>` : ''}
                         ${abilityHTML} ${equipmentHTML} ${weaponHTML}
                     </div>
                 </div>
@@ -863,11 +873,10 @@
                     html += `<div style="font-weight:bold; color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px; margin-bottom:10px; margin-top:15px;">[${phase}] 유닛 목록</div>`;
                     
                     faction.phases[phase].forEach((u, i) => {
-                        // DB 리스트 전용 고유 ID 생성
                         const detailId = `kt-db-view-detail-${factionIndex}-${phase.replace(/\s/g,'')}-${i}`;
                         const iconId = `kt-db-view-icon-${factionIndex}-${phase.replace(/\s/g,'')}-${i}`;
 
-                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
+                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb-large" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
                         
                         let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
                         let equipmentHTML = '';
@@ -901,7 +910,6 @@
                             }
                         }
 
-                        // DB 뷰에서도 이름 누르면 상세 정보가 펼쳐지는 아코디언 적용
                         html += `
                             <div class="unit-item" style="padding:10px 5px;">
                                 <div style="display:flex; align-items:center; width:100%; cursor:pointer;" onclick="toggleDetail('${detailId}', '${iconId}')">
@@ -911,9 +919,9 @@
                                     </div>
                                 </div>
                                 <div id="${detailId}" class="detail-content">
-                                    <div style="display:flex; width:100%;">
-                                        ${imgTag}
-                                        <div style="flex-grow:1;">
+                                    <div style="display:block; width:100%;">
+                                        ${u.image ? `<div style="margin-bottom:10px;">${imgTag}</div>` : ''}
+                                        <div style="width:100%;">
                                             ${abilityHTML} ${equipmentHTML} ${weaponHTML}
                                         </div>
                                     </div>
@@ -932,7 +940,7 @@
 
     
     // =========================================================================
-    // [2단계] 킬팀 로스터 관리 
+    // [2단계] 킬팀 로스터 관리
     // =========================================================================
 
     function initKtRosterEditScreen() {
@@ -965,25 +973,44 @@
         
         savedKtDbFactions = JSON.parse(localStorage.getItem('killteam_db_factions')) || [];
 
+        // --- 로스터 내 옛날 데이터 / 동기화 패치 ---
         let dbFaction = savedKtDbFactions.find(f => String(f.id) === String(currentKtRoster.factionDbId));
         if(dbFaction) {
             gameConfig.killteam.phases.forEach(phase => {
                 if(currentKtRoster.phases[phase] && dbFaction.phases[phase]) {
                     currentKtRoster.phases[phase].forEach(ru => {
-                        let dbUnit = dbFaction.phases[phase].find(du => du.id === ru.id);
-                        if(!dbUnit && currentKtRoster.phases[phase]) {
-                            dbUnit = currentKtRoster.phases[phase].find(x => x.name === ru.name && x.ability === ru.ability);
+                        let dbUnit = dbFaction.phases[phase].find(du => du.id === (ru.originalId || ru.id));
+                        if(!dbUnit) {
+                            dbUnit = dbFaction.phases[phase].find(x => x.name === ru.name && x.ability === ru.ability);
                         }
 
-                        if(dbUnit && dbUnit.weapons && ru.weapons && ru.weapons.length > 0 && ru.weapons[0].checked === undefined) {
-                            let upgradedWeapons = [];
-                            dbUnit.weapons.forEach(dw => {
-                                let isChecked = ru.weapons.some(rw => rw.name === dw.name && rw.atk === dw.atk && rw.hit === dw.hit);
-                                let newWep = JSON.parse(JSON.stringify(dw));
-                                newWep.checked = isChecked;
-                                upgradedWeapons.push(newWep);
-                            });
-                            ru.weapons = upgradedWeapons;
+                        if(dbUnit) {
+                            // DB 변경사항을 로스터에 동기화
+                            ru.image = dbUnit.image;
+                            ru.ability = dbUnit.ability;
+                            ru.apAbilities = dbUnit.apAbilities;
+
+                            // 무기 체크 상태 보존 및 동기화
+                            if(dbUnit.weapons && ru.weapons) {
+                                let upgradedWeapons = [];
+                                dbUnit.weapons.forEach(dw => {
+                                    let existing = ru.weapons.find(rw => rw.name === dw.name);
+                                    let isChecked = false;
+                                    
+                                    if(ru.weapons.length > 0 && ru.weapons[0].checked === undefined) {
+                                        // 초창기 데이터: 배열에 존재하는지 여부로 체크 상태 판단
+                                        isChecked = ru.weapons.some(rw => rw.name === dw.name && rw.atk === dw.atk && rw.hit === dw.hit);
+                                    } else if (existing) {
+                                        // 최신 데이터: checked 속성 보존
+                                        isChecked = existing.checked !== false;
+                                    }
+                                    
+                                    let newWep = JSON.parse(JSON.stringify(dw));
+                                    newWep.checked = isChecked;
+                                    upgradedWeapons.push(newWep);
+                                });
+                                ru.weapons = upgradedWeapons;
+                            }
                         }
                     });
                 }
@@ -1022,6 +1049,8 @@
         if(sourceUnit) {
             let newUnit = JSON.parse(JSON.stringify(sourceUnit));
             newUnit.id = generateId(); 
+            newUnit.originalId = sourceUnit.originalId || sourceUnit.id; // DB 원본 추적용 ID
+            
             if(newUnit.weapons) {
                 newUnit.weapons.forEach(w => w.checked = true); 
             }
@@ -1089,6 +1118,14 @@
 
             if (currentKtRoster.phases[phase]) {
                 currentKtRoster.phases[phase].forEach(ru => {
+                    // DB 동기화
+                    let dbUnit = dbFaction && dbFaction.phases && dbFaction.phases[phase] ? dbFaction.phases[phase].find(u => u.id === (ru.originalId || ru.id)) : null;
+                    if(dbUnit) {
+                        ru.image = dbUnit.image;
+                        ru.ability = dbUnit.ability;
+                        ru.apAbilities = dbUnit.apAbilities;
+                    }
+
                     if (!unitPool.find(u => u.id === ru.id)) {
                         ru.isOriginal = false; 
                         unitPool.push(ru);
@@ -1106,7 +1143,7 @@
 
                     let rosterUnit = currentKtRoster.phases[phase].find(item => item.id === u.id);
                     const isChecked = rosterUnit ? true : false;
-                    const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')" style="margin-top:0;">` : ''; 
+                    const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb-large" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
                     
                     let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
                     let equipmentHTML = '';
@@ -1176,9 +1213,9 @@
                                 </div>
                             </div>
                             <div id="${detailId}" class="${detailClass}">
-                                <div style="display:flex; width:100%;">
-                                    ${imgTag}
-                                    <div style="flex-grow:1;">
+                                <div style="display:block; width:100%;">
+                                    ${u.image ? `<div style="margin-bottom:10px;">${imgTag}</div>` : ''}
+                                    <div style="width:100%;">
                                         ${abilityHTML}
                                         ${equipmentHTML}
                                         ${weaponHTML}
@@ -1326,7 +1363,7 @@
                         const iconId = `view-icon-${factionIndex}-${phase.replace(/\s/g,'')}-${unitIndex}`;
 
                         const isChecked = u.checked ? 'checked' : '';
-                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb" onclick="event.stopPropagation(); openImageModal('${u.image}')" style="margin-top:0;">` : ''; 
+                        const imgTag = u.image ? `<img src="${u.image}" class="unit-thumb-large" onclick="event.stopPropagation(); openImageModal('${u.image}')">` : ''; 
                         
                         let abilityHTML = u.ability ? `<div class="unit-ability">${u.ability.trim()}</div>` : '';
                         let equipmentHTML = '';
@@ -1334,11 +1371,11 @@
 
                         if(currentGameKey === 'killteam' && phase === 'Firefight Phase') {
                             let apArray = u.apAbilities || [];
-                            
                             if (apArray.length > 0) {
                                 equipmentHTML = apArray.map(ap => `<div class="unit-equipment"><strong style="color: var(--primary-color);">[AP 능력]</strong> ${ap.trim()}</div>`).join('');
                             }
                             
+                            // 체크 해제된 무기는 보이지 않게 필터링
                             let wepArray = u.weapons || [];
                             wepArray = wepArray.filter(w => w.checked !== false);
 
@@ -1373,9 +1410,9 @@
                                     </div>
                                 </div>
                                 <div id="${detailId}" class="detail-content">
-                                    <div style="display:flex; width:100%;">
-                                        ${imgTag}
-                                        <div style="flex-grow:1;">
+                                    <div style="display:block; width:100%;">
+                                        ${u.image ? `<div style="margin-bottom:10px;">${imgTag}</div>` : ''}
+                                        <div style="width:100%;">
                                             ${abilityHTML} ${equipmentHTML} ${weaponHTML}
                                         </div>
                                     </div>
@@ -1651,7 +1688,7 @@
         
         if(currentData[phase]) {
             currentData[phase].forEach((item, index) => {
-                const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb" onclick="openImageModal('${item.image}')">` : '';
+                const imgTag = item.image ? `<img src="${item.image}" class="unit-thumb-large" onclick="openImageModal('${item.image}')">` : '';
                 let abilityHTML = item.ability ? `<div class="unit-ability">${item.ability.trim()}</div>` : '';
 
                 listContainer.innerHTML += `
@@ -1661,7 +1698,6 @@
                          
                         <div style="display:flex; align-items:flex-start; width:100%;">
                             <div style="padding-right:10px; color:#bdc3c7; cursor:grab; font-size:24px; font-weight:normal; line-height: 1; padding-top: 5px;">≡</div>
-                            ${imgTag}
                             <div style="flex-grow:1; padding-top: 4px;">
                                 <div class="unit-name">${index + 1}. ${item.name ? item.name.trim() : ''}</div>
                             </div>
@@ -1677,6 +1713,7 @@
                             </div>
                         </div>
                         <div style="margin-top: 12px; width: 100%;">
+                            ${item.image ? `<div style="margin-bottom:10px;">${imgTag}</div>` : ''}
                             ${abilityHTML}
                         </div>
                     </div>
